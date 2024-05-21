@@ -58,16 +58,15 @@ class UI extends React.Component<UIInterface, {}> {
         this.sidebar_open = !this.sidebar_open
         var sidebar = document.getElementById('sidebar') as HTMLDivElement
         sidebar.classList.toggle('closed')
-        var sidebar_button = document.getElementById('sidebar_button') as HTMLButtonElement
+        var panel = document.getElementById('sidebar_panel') as HTMLDivElement
+        panel.classList.toggle('closed')
+        var button = document.getElementById('sidebar_button') as HTMLButtonElement
+        button.classList.toggle('closed')
         if (this.sidebar_open) {
-            sidebar.style.cssText='scale:100%;'
-            sidebar_button.style.cssText='background-color:white;color:rgba(0, 0, 0, 0.85);border-color:black;border: solid 2px black'
-            sidebar_button.innerHTML = 'close'
+            button.innerHTML = 'close'
         }
         else {
-            sidebar.style.cssText='scale:0%;'
-            sidebar_button.style.cssText='left:0em;'
-            sidebar_button.innerHTML = 'open'
+            button.innerHTML = 'open'
         }
     }
 
@@ -75,16 +74,14 @@ class UI extends React.Component<UIInterface, {}> {
         return(
             <>
                 <div id='sidebar'>
-                    <h4 style={{fontSize:'1em'}}>res: <span id='res'/></h4>
-                    <h4 style={{fontSize:'1em'}}>fps: <span id='fps'/></h4>
+                    <div id='sidebar_panel'>
+                        <h4 style={{fontSize:'1em'}}>res: <span id='res'/></h4>
+                        <h4 style={{fontSize:'1em'}}>fps: <span id='fps'/></h4>
+                    </div>
+                    <button id='sidebar_button' className='ui_button' onClick={this.toggle_sidebar}>close</button>
                 </div> 
 
-                <div>
-                    <button id='sidebar_button' className='ui_button' style={{
-                        backgroundColor:'white', 
-                        color:'rgba(0, 0, 0, 0.85)', 
-                        border:'solid 2px black'}} onClick={this.toggle_sidebar}>close</button>
-                </div>
+                
             </>
         )
     }

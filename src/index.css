@@ -20,11 +20,25 @@ h1, h2, h3, h4 {
 }
 
 #sidebar {
-  background-color: rgba(0, 0, 0, 0.1);
-  transition: 1s cubic-bezier(.36,-0.01,0,.77);
+  width: 24em;
+  transition: 0.5s ease-in-out;
 
-  scale: 100%; /* start open */
+  /* position */
+  position: absolute;
+  top:0px;
+  bottom:0px;
+  left:0px;
+}
+
+#sidebar.closed {
+  left: -16.5em;
+}
+
+#sidebar_panel {
+  transition: 0.5s ease-in-out;
+
   width: 16em;
+  height: 100%;
   overflow-y: auto;
 
   padding-top: 0.5em;
@@ -38,17 +52,33 @@ h1, h2, h3, h4 {
   bottom:0px;
   left:0px;
   direction: ltr;
+
+  background-color:rgba(0, 0, 0, 0.1);
+  box-shadow: black 0.5em 0.0em 0.5em;
 }
 
-#sidebar.closed {
-  margin-left: -16em;
+#sidebar_panel.closed {
+  box-shadow: black 0.0em 0.0em 0.0em;
 }
 
 #sidebar_button {
+  transition: 0.5s ease-in-out;
+
   /* position */
   position: absolute;
   top:0px;
-  left:16em;
+  left:16.5em;
+
+  background-color:white;
+  color:black;
+  border-color:black;
+  border: solid 2px black
+}
+
+#sidebar_button.closed {
+  background-color: black;
+  color:white;
+  border: none;
 }
 
 .ui_button {
@@ -56,8 +86,8 @@ h1, h2, h3, h4 {
   /* text */
   color: rgba(255, 255, 255, 0.8);
   font-family: monospace;
-  font-size:16px;
-  text-align:center;
+  font-size: 16px;
+  text-align: center;
   /* padding */
   padding-top: 0.5em;
   padding-left: 0.7em;
