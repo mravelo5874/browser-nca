@@ -1,13 +1,82 @@
-body {
+html, body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  height: 100%;
+  width: 100%;
+  max-width: 100%;
+  min-width: 100%;
+  background-color: rgb(255, 255, 255);
+  overflow: hidden;
+  font-family: "Monaco", monospace;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+canvas {
+  display: block;  /* prevents scrollbar */
+  width: 100vw;
+  height: 100vh;
+}
+
+h1, h2, h3, h4 {
+  margin: 0px;
+}
+
+#sidebar {
+  background-color: rgba(0, 0, 0, 0.1);
+  transition: 1s cubic-bezier(.36,-0.01,0,.77);
+
+  scale: 100%; /* start open */
+  width: 16em;
+  overflow-y: auto;
+
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  padding-left: 0.5em;
+  padding-left: 0.5em;
+
+  /* position */
+  position: absolute;
+  top:0px;
+  bottom:0px;
+  left:0px;
+  direction: ltr;
+}
+
+#sidebar.closed {
+  margin-left: -16em;
+}
+
+#sidebar_button {
+  /* position */
+  position: absolute;
+  top:0px;
+  left:16em;
+}
+
+.ui_button {
+  background-color: rgba(0, 0, 0, 0.4);
+  /* text */
+  color: rgba(255, 255, 255, 0.8);
+  font-family: monospace;
+  font-size:16px;
+  text-align:center;
+  /* padding */
+  padding-top: 0.5em;
+  padding-left: 0.7em;
+  padding-right: 0.7em;
+  padding-bottom: 0.5em;
+  /* border */
+  border: none;
+  /* border: solid 0.1em rgba(0, 0, 0, 0.3); */
+  box-shadow: black 0.1em 0.1em 0.1em;
+
+}
+.ui_button:hover {
+  background-color: rgba(0, 119, 255, 0.85);
+  color: white;
+}
+.ui_button:active {
+  -webkit-transition: .2s;
+  transition: .2s;
+  background-color: rgba(255, 0, 85, 0.85);
+  box-shadow: black -0.05em -0.05em 0.1em;
+  color: white;
 }

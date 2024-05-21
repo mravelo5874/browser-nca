@@ -4,11 +4,11 @@ import './index.css'
 import { App } from './App'
 import { Sim } from './Sim'
 
+// create new simulation
 let sim = new Sim()
 
-const root = ReactDOM.createRoot(
-	document.getElementById('root') as HTMLElement
-)
+// render simulation to canvas
+const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement)
 root.render(
   	<React.StrictMode>
     	<App sim={sim}/>
