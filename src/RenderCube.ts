@@ -222,6 +222,9 @@ in vec3 v_ray;
 
 out vec4 fragColor;
 
+const float floor = -0.5;
+const vec3 light_pos = vec3(2.0, 2.0, 2.0);
+
 vec2 intersect_box(vec3 orig, vec3 dir) {
 	const vec3 box_min = vec3(-0.5, -0.5, -0.5);
 	const vec3 box_max = vec3(0.5, 0.5, 0.5);
@@ -235,6 +238,13 @@ vec2 intersect_box(vec3 orig, vec3 dir) {
 	return vec2(t0, t1);
 }
 
+float intersect_floor(vec3 orig, vec3 dir) {
+    // Ground plane equation: y = -0.5
+    // Solve for t in the ray equation: origin + t * direction
+    float t = (floor - orig[1]) / dir[1];
+    return t;
+}
+
 void main() {   
     vec4 my_color = vec4(1.0, 0.0, 0.0, 1.0);
 
@@ -242,42 +252,13 @@ void main() {
     vec3 ray = normalize(v_ray);
 
     // step 2: intersect ray with volume, find interval along ray inside volume
-    vec2 t_hit = intersect_box(v_ray, ray);
-    if (t_hit.x > t_hit.y) {
-        discard;
-    }
-    else {
+    vec2 t_hit = intersect_box(v_eye, ray);
+
+    // if hit box
+    if (t_hit.x <= t_hit.y) {
         vec4 aa = vec4(v_ray, 1.0) * 0.2;
         vec4 bb = vec4(v_uv, 0.0, 1.0) * 0.8;
         fragColor = (aa + bb);
     }
-
-    // // avoid sampling behind eye
-    // t_hit.x = max(t_hit.x, 0.0);
-
-    // // step 3: set step size to march through volume
-    // float dt = 0.0005;
-
-    // // step 4: march ray through volume and sample
-    // vec3 p = v_eye + t_hit.x * ray;
-    // for (float t = t_hit.x; t < t_hit.y; t += dt) {
-    //     // sample volume
-    //     vec3 pos = p + 0.5;
-    //     float val = texture(u_volume, pos).r;
-
-    //     // get color from transfer function
-    //     float alpha = pow(2.0, val) - 1.0;
-    //     vec4 val_color = vec4(texture(u_func, vec2(val * 2.0, 0.5)).rgb, alpha);
-
-    //     my_color.rgb += (1.0 - my_color.a) * val_color.a * val_color.rgb;
-    //     my_color.a += (1.0 - my_color.a) * val_color.a;
-
-    //     if (my_color.a >= 0.95) {
-    //         break;
-    //     }
-    //     p += ray * dt;
-    // }
-
-    // fragColor = my_color;
 }
 `;
