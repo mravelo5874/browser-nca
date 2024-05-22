@@ -2,6 +2,7 @@ import { webgl_util } from './WebGL_Util'
 import { CanvasResize } from './CanvasResize'
 import { UI } from './UI'
 import { delay } from './Util'
+import { Vec3 } from './lib/ary'
 
 export { Sim }
 
