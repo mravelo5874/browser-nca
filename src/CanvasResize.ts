@@ -13,9 +13,7 @@ class CanvasResize {
     phys_width: number;
     phys_height: number;
     
-    
     constructor(_canvas: HTMLCanvasElement) {
-
         this.canvas = _canvas;
         this.phys_width = _canvas.width;
         this.phys_height = _canvas.height;

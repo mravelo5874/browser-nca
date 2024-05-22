@@ -1,4 +1,4 @@
-import { Camera, Cube, VolumeData, Vec4 } from './lib/ary'
+import { Camera, Cube, VolumeData, Vec4 } from './lib/rary'
 
 export { RenderCube }
 

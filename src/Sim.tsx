@@ -2,7 +2,7 @@ import { webgl_util } from './WebGL_Util'
 import { CanvasResize } from './CanvasResize'
 import { UI } from './UI'
 import { delay } from './Util'
-import { Camera, Vec3, Vec4, VolumeData } from './lib/ary'
+import { Camera, Vec3, Vec4, VolumeData } from './lib/rary'
 import { RenderCube } from './RenderCube'  
 
 export { Sim }
@@ -51,7 +51,7 @@ class Sim {
         this.context = webgl_util.request_context(this.canvas)
         this.resize = new CanvasResize(this.canvas)
         this.rendercube = new RenderCube(this.context)
-        this.reset_camera()
+        this.reboot_camera()
         console.log('simulation initialized...')
     }
 
@@ -60,7 +60,21 @@ class Sim {
         console.log('simulation started...')
     }
 
-    reset_camera() {
+    reset_camera () {
+        let canvas = this.canvas as HTMLCanvasElement
+        let cam = this.camera as Camera
+        this.camera = new Camera(
+            cam.pos(),
+            cam.target(),
+            cam.up(),
+            45,
+            canvas.width / canvas.height,
+            0.1,
+            1000.0
+        )
+    }
+
+    reboot_camera() {
         let canvas = this.canvas as HTMLCanvasElement
         this.camera = new Camera(
             new Vec3([0, 0, -Sim.zoom]),
@@ -82,6 +96,7 @@ class Sim {
             // reset current sim
             this.resize?.resize_canvas_to_display_size(this.ui);
             (async () => { 
+                this.reset_camera()
                 await delay(1)
             })();
         }
@@ -127,7 +142,7 @@ class Sim {
         switch (this.mouse_button) {
         default: break
         case 1:
-            this.reset_camera()
+            this.reboot_camera()
             break
         case 2:
             break
