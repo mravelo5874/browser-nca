@@ -59,6 +59,7 @@ h1, h2, h3, h4 {
 
 #sidebar_panel.closed {
   box-shadow: black 0.0em 0.0em 0.0em;
+  background-color:black;
 }
 
 #sidebar_button {
@@ -69,20 +70,19 @@ h1, h2, h3, h4 {
   top:0px;
   left:16.5em;
 
-  background-color:white;
+  background-color:rgb(230,230,230);
   color:black;
-  border-color:black;
-  border: solid 2px black
+  box-shadow: black 0.1em 0.1em 0.1em;
 }
 
 #sidebar_button.closed {
   background-color: black;
   color:white;
-  border: none;
+  border: solid 0.1em white;
+  box-shadow: white 0.1em 0.1em 0.1em;
 }
 
 .ui_button {
-  background-color: rgba(0, 0, 0, 0.4);
   /* text */
   color: rgba(255, 255, 255, 0.8);
   font-family: monospace;
@@ -96,17 +96,13 @@ h1, h2, h3, h4 {
   /* border */
   border: none;
   /* border: solid 0.1em rgba(0, 0, 0, 0.3); */
-  box-shadow: black 0.1em 0.1em 0.1em;
+  box-shadow: white 0.1em 0.1em 0.1em;
+}
 
-}
-.ui_button:hover {
-  background-color: rgba(0, 119, 255, 0.85);
-  color: white;
-}
 .ui_button:active {
   -webkit-transition: .2s;
   transition: .2s;
-  background-color: rgba(255, 0, 85, 0.85);
+  background-color: rgba(255, 169, 46, 0.85);
   box-shadow: black -0.05em -0.05em 0.1em;
   color: white;
 }
