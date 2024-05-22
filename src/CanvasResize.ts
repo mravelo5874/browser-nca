@@ -67,9 +67,6 @@ class CanvasResize {
     resize_canvas_to_display_size(ui: UI | null) {
         // Get the size the browser is displaying the canvas in device pixels.
         let [displayWidth, displayHeight] = CanvasResize.canvas_to_disp_size.get(this.canvas) as number[];
-
-        displayWidth /= Sim.zoom;
-        displayHeight /= Sim.zoom;
         
         // update ui
         if (ui) ui.update_res_node(displayWidth, displayHeight)

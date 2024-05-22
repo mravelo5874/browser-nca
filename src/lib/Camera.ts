@@ -1,4 +1,4 @@
-import { Mat4, Mat3, Vec3, Quat } from './TSM';
+import { Mat4, Mat3, Vec3, Quat } from './TSM'
 
 export class RayCamera {
   public position: Vec3;
