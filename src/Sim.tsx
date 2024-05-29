@@ -2,8 +2,9 @@ import { webgl_util } from './WebGL_Util'
 import { CanvasResize } from './CanvasResize'
 import { UI } from './UI'
 import { delay, random_uint8_volume } from './Util'
-import { Camera, Vec3, Vec4, VolumeData } from './lib/rary'
+import { Camera, Vec3, Vec4 } from './lib/rary'
 import { RenderCube } from './RenderCube'  
+import { cowboy16 } from './data/all'
 
 export { Sim }
 
@@ -52,11 +53,19 @@ class Sim {
         this.resize = new CanvasResize(this.canvas)
         this.rendercube = new RenderCube(this.context)
         this.reboot_camera()
+        this.setup_texture3d()
         console.log('simulation initialized...')
-        
-        let gl = this.context
-        let data = random_uint8_volume(16, 16, 16, 'thisisaseedforarandomnumbergenerator')
-        console.log('data: ', data)
+    }
+
+    start() {
+        window.requestAnimationFrame(() => this.render_loop())
+        console.log('simulation started...')
+    }
+
+    setup_texture3d() {
+        let gl = this.context as WebGL2RenderingContext
+        let size = 16
+        let data = new Uint8Array(cowboy16) //random_uint8_volume(size, size, size, 'thisisaseedforarandomnumbergenerator', 0.7)
         this.texture3d = gl.createTexture() as WebGLTexture
         gl.bindTexture(gl.TEXTURE_3D, this.texture3d);
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -64,14 +73,7 @@ class Sim {
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_S, gl.REPEAT);
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_T, gl.REPEAT);
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_R, gl.REPEAT);
-        // gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
-        // gl.pixelStorei(gl.PACK_ALIGNMENT, 4);
-        gl.texImage3D(gl.TEXTURE_3D, 0, gl.RGBA, 16, 16, 16, 0, gl.RGBA, gl.UNSIGNED_BYTE, data)
-    }
-
-    start() {
-        window.requestAnimationFrame(() => this.render_loop())
-        console.log('simulation started...')
+        gl.texImage3D(gl.TEXTURE_3D, 0, gl.RGBA, size, size, size, 0, gl.RGBA, gl.UNSIGNED_BYTE, data)
     }
 
     reset_camera () {
@@ -144,10 +146,8 @@ class Sim {
         let w = this.canvas?.width as number
         let h = this.canvas?.height as number
         if (this.texture3d) {
-            console.log('rendering frame w/ texture3d')
             rendercube.render(w, h, camera, this.bg, this.texture3d)
         } else {
-            console.log('rendering frame w/o texture3d')
             rendercube.render(w, h, camera, this.bg)
         }
     }
