@@ -17,6 +17,7 @@ class VolumeData {
         this.gl = _gl;
         this.size = _size;
 
+
         // create 3D texture
         let gl = this.gl;
         let s = this.size;

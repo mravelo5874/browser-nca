@@ -1,7 +1,7 @@
 import { webgl_util } from './WebGL_Util'
 import { CanvasResize } from './CanvasResize'
 import { UI } from './UI'
-import { delay } from './Util'
+import { delay, random_uint8_volume } from './Util'
 import { Camera, Vec3, Vec4, VolumeData } from './lib/rary'
 import { RenderCube } from './RenderCube'  
 
@@ -21,13 +21,13 @@ class Sim {
     ui: UI | null = null
     camera: Camera | null = null
     rendercube: RenderCube | null = null
-    volume_old: VolumeData | null = null;
+    texture3d: WebGLTexture | null = null;
 
     // user input
     is_input: boolean = false
     mouse_button: number = 0
     cam_sense: number = 0.25
-    rot_speed: number = 0.05
+    rot_speed: number = 0.01
     zoom_speed: number = 0.002
     min_zoom: number = 0.0
     max_zoom: number = 8.0
@@ -53,6 +53,20 @@ class Sim {
         this.rendercube = new RenderCube(this.context)
         this.reboot_camera()
         console.log('simulation initialized...')
+        
+        let gl = this.context
+        let data = random_uint8_volume(16, 16, 16, 'thisisaseedforarandomnumbergenerator')
+        console.log('data: ', data)
+        this.texture3d = gl.createTexture() as WebGLTexture
+        gl.bindTexture(gl.TEXTURE_3D, this.texture3d);
+        gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_S, gl.REPEAT);
+        gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_T, gl.REPEAT);
+        gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_R, gl.REPEAT);
+        // gl.pixelStorei(gl.UNPACK_ALIGNMENT, 4);
+        // gl.pixelStorei(gl.PACK_ALIGNMENT, 4);
+        gl.texImage3D(gl.TEXTURE_3D, 0, gl.RGBA, 16, 16, 16, 0, gl.RGBA, gl.UNSIGNED_BYTE, data)
     }
 
     start() {
@@ -129,7 +143,13 @@ class Sim {
         let rendercube = this.rendercube as RenderCube
         let w = this.canvas?.width as number
         let h = this.canvas?.height as number
-        rendercube.render(w, h, camera, this.bg)
+        if (this.texture3d) {
+            console.log('rendering frame w/ texture3d')
+            rendercube.render(w, h, camera, this.bg, this.texture3d)
+        } else {
+            console.log('rendering frame w/o texture3d')
+            rendercube.render(w, h, camera, this.bg)
+        }
     }
 
     /*****************************************************************

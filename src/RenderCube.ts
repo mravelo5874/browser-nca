@@ -9,7 +9,7 @@ class RenderCube {
     program: WebGLProgram
     vao: WebGLVertexArrayObject
     func: WebGLTexture | null
-    blend_volume: boolean = true
+    blend_volume: boolean = false
 
     constructor(_gl: WebGL2RenderingContext) {
         this.cube = new Cube()
@@ -63,7 +63,7 @@ class RenderCube {
         // this.setup_cube_render(gl, );
     }
 
-    render(w: number, h: number, camera: Camera, bg: Vec4, volume_in?: VolumeData) {
+    render(w: number, h: number, camera: Camera, bg: Vec4, texture3d?: WebGLTexture) {
         let gl = this.gl
 
         // move camera
@@ -93,14 +93,14 @@ class RenderCube {
         gl.viewport(0, 0, w, h);
 
         // setup render cube
-        this.setup_cube_render(gl, camera, volume_in);
+        this.setup_cube_render(gl, camera, bg, texture3d);
 
         // draw
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.drawElements(gl.TRIANGLES, this.cube.get_idx_u32().length, gl.UNSIGNED_INT, 0);
     }
 
-    setup_cube_render(gl: WebGL2RenderingContext, camera: Camera, _volume?: VolumeData) {
+    setup_cube_render(gl: WebGL2RenderingContext, camera: Camera, bg: Vec4, texture3d?: WebGLTexture) {
         let program = this.program as WebGLProgram;
         
         // draw cube
@@ -154,16 +154,14 @@ class RenderCube {
         gl.uniform3fv(eye_loc, new Float32Array(camera.pos().xyz));
 
         // bind transfer function texture
-        const func_loc = gl.getUniformLocation(program, 'u_func');
-        gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D, this.func);
-        gl.uniform1i(func_loc, 1);
+        const bg_loc = gl.getUniformLocation(program, 'u_bg_color');
+        gl.uniform4fv(bg_loc, new Float32Array(bg.rgba));
 
         // set volume uniform
-        if (_volume) {
+        if (texture3d) {
             const volume_loc = gl.getUniformLocation(program, 'u_volume');
-            gl.activeTexture(gl.TEXTURE0+2);
-            gl.bindTexture(gl.TEXTURE_3D, _volume.texture);
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_3D, texture3d);
             gl.generateMipmap(gl.TEXTURE_3D);
             gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -176,7 +174,7 @@ class RenderCube {
                 gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
                 gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
             }
-            gl.uniform1i(volume_loc, 2);
+            gl.uniform1i(volume_loc, 0);
         }
     }
 }
@@ -213,7 +211,7 @@ const _3D_FRAG =
 precision highp float;
 
 uniform highp sampler3D u_volume;
-uniform highp sampler2D u_func; 
+uniform vec4 u_bg_color;
 
 in vec4 v_norm;
 in vec2 v_uv;
@@ -221,9 +219,6 @@ in vec3 v_eye;
 in vec3 v_ray;
 
 out vec4 fragColor;
-
-const float floor = -0.5;
-const vec3 light_pos = vec3(2.0, 2.0, 2.0);
 
 vec2 intersect_box(vec3 orig, vec3 dir) {
 	const vec3 box_min = vec3(-0.5, -0.5, -0.5);
@@ -238,27 +233,57 @@ vec2 intersect_box(vec3 orig, vec3 dir) {
 	return vec2(t0, t1);
 }
 
-float intersect_floor(vec3 orig, vec3 dir) {
-    // Ground plane equation: y = -0.5
-    // Solve for t in the ray equation: origin + t * direction
-    float t = (floor - orig[1]) / dir[1];
-    return t;
-}
-
 void main() {   
-    vec4 my_color = vec4(1.0, 0.0, 0.0, 1.0);
+    vec4 my_color = vec4(0.0, 0.0, 0.0, 0.0);
 
     // step 1: normalize ray
     vec3 ray = normalize(v_ray);
 
     // step 2: intersect ray with volume, find interval along ray inside volume
     vec2 t_hit = intersect_box(v_eye, ray);
-
-    // if hit box
-    if (t_hit.x <= t_hit.y) {
-        vec4 aa = vec4(v_ray, 1.0) * 0.2;
-        vec4 bb = vec4(v_uv, 0.0, 1.0) * 0.8;
-        fragColor = (aa + bb);
+    if (t_hit.x > t_hit.y) {
+        discard;
     }
+
+    // avoid sampling behind eye
+    t_hit.x = max(t_hit.x, 0.0);
+
+    // step 3: set step size to march through volume
+    float dt = 0.0005;
+
+    // step 4: march ray through volume and sample
+    vec3 p = v_eye + t_hit.x * ray;
+    for (float t = t_hit.x; t < t_hit.y; t += dt) {
+        // step 5: sample volume
+        vec3 pos = p+0.5;
+        vec4 rgba = texture(u_volume, pos);
+
+        if (rgba.a <= 0.5)
+            rgba.a *= 0.005;
+
+        // if miss -> hit bg
+        if (rgba.a == 0.0 && my_color.a > 0.0) {
+            p += ray * dt;
+            continue;
+        }
+
+        my_color.rgb += (1.0 - my_color.a) * rgba.a * rgba.rgb;
+        my_color.a += (1.0 - my_color.a) * rgba.a;
+
+        if (my_color.a >= 0.95) {
+            my_color.a = 1.0;
+            break;
+        }
+        p += ray * dt;
+    }
+
+    // set color to u_bg_color if no voxels hit
+    if (my_color == vec4(0.0)) {
+        my_color = u_bg_color;
+    }
+
+    // add bg color
+    my_color.rgba = vec4(u_bg_color.rgb * (1.0 - my_color.a) + (my_color.rgb * my_color.a), 1.0);
+    fragColor = my_color;
 }
 `;
