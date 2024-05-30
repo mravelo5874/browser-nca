@@ -4,7 +4,7 @@ export { Plane }
 
 class Plane
 {
-    static S: number = 2.0
+    static S: number = 8.0
     static F: number = -0.8
 
     private pos_v4: Vec4[]

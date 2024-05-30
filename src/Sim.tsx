@@ -49,7 +49,7 @@ class Sim {
     constructor() {
         this.paused = false
         this.bg = new Vec4([1.0, 1.0, 1.0, 1.0])
-        this.light = new Vec3([1.0, 3, 1.0])
+        this.light = new Vec3([2, 2, -2])
         console.log('simulation constructed...')
     }
 
@@ -150,6 +150,9 @@ class Sim {
             this.orbit_cube(dx, dy);
             this.prev_d = new Vec2(this.prev_d.scale(this.rot_fric).xy)
         }
+
+        // move light source
+        this.light = new Vec3([Math.sin(curr_time*0.001)*2, 2, Math.cos(curr_time*0.001)*-2])
 
         // request next frame to be drawn
         window.requestAnimationFrame(() => this.render_loop())
