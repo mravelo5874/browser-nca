@@ -13,8 +13,9 @@ class Sim {
 
     // simulation components
     paused: boolean
-    bg: Vec4;
-    static zoom: number = 1.8;
+    bg: Vec4
+    light: Vec3
+    static zoom: number = 1.8
 
     // render components
     canvas: HTMLCanvasElement | null = null
@@ -24,7 +25,7 @@ class Sim {
     camera: Camera | null = null
     rendercube: RenderCube | null = null
     rendershadow: RenderShadow | null = null
-    texture3d: WebGLTexture | null = null;
+    texture3d: WebGLTexture | null = null
 
     // user input
     is_input: boolean = false
@@ -38,16 +39,17 @@ class Sim {
     prev_d: Vec2 = Vec2.zero
 
     // used to calculate time and fps
-    fps: number = 0;
-    start_time: number = 0;
-    prev_time: number = 0;
-    curr_delta_time: number = 0;
-    prev_fps_time: number = 0;
-    frame_count: number = 0;
+    fps: number = 0
+    start_time: number = 0
+    prev_time: number = 0
+    curr_delta_time: number = 0
+    prev_fps_time: number = 0
+    frame_count: number = 0
 
     constructor() {
         this.paused = false
         this.bg = new Vec4([1.0, 1.0, 1.0, 1.0])
+        this.light = new Vec3([1.0, 3, 1.0])
         console.log('simulation constructed...')
     }
 
@@ -155,14 +157,14 @@ class Sim {
 
     render_frame() {
         let camera = this.camera as Camera
-        let rendercube = this.rendercube as RenderCube
         let w = this.canvas?.width as number
         let h = this.canvas?.height as number
-        this.rendershadow?.render(w, h, camera, this.bg)
         if (this.texture3d) {
-            rendercube.render(w, h, camera, this.bg, this.texture3d)
+            this.rendershadow?.render(w, h, camera, this.bg, this.light, this.texture3d)
+            this.rendercube?.render(w, h, camera, this.bg, this.texture3d)
         } else {
-            rendercube.render(w, h, camera, this.bg)
+            this.rendershadow?.render(w, h, camera, this.bg, this.light)
+            this.rendercube?.render(w, h, camera, this.bg)
         }
     }
 

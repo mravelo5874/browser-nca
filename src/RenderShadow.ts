@@ -1,4 +1,4 @@
-import { Camera, Plane, Vec4 } from './lib/rary'
+import { Camera, Plane, Vec3, Vec4 } from './lib/rary'
 
 export { RenderShadow }
 
@@ -51,12 +51,12 @@ class RenderShadow
         gl.useProgram(this.program);
     }
 
-    render(w: number, h: number, camera: Camera, bg: Vec4) {
+    render(w: number, h: number, camera: Camera, bg: Vec4, light: Vec3, texture3d?: WebGLTexture) {
         let gl = this.gl
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.clearColor(bg.r, bg.g, bg.b, bg.a);
         gl.clear(gl.COLOR_BUFFER_BIT);
-        // gl.enable(gl.CULL_FACE);
+        gl.enable(gl.CULL_FACE);
         gl.cullFace(gl.BACK);
         gl.frontFace(gl.CCW);
         gl.enable(gl.BLEND);
@@ -64,14 +64,14 @@ class RenderShadow
         gl.viewport(0, 0, w, h);
 
         // setup render plane
-        this.setup_cube_render(gl, camera, bg);
+        this.setup_plane_render(gl, camera, bg, light, texture3d);
 
         // draw
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.drawElements(gl.TRIANGLES, this.plane.get_idx_u32().length, gl.UNSIGNED_INT, 0);
     }
 
-    setup_cube_render(gl: WebGL2RenderingContext, camera: Camera, bg: Vec4, texture3d?: WebGLTexture) {
+    setup_plane_render(gl: WebGL2RenderingContext, camera: Camera, bg: Vec4, light: Vec3, texture3d?: WebGLTexture) {
         let program = this.program as WebGLProgram;
         
         // draw cube
@@ -120,13 +120,29 @@ class RenderShadow
         const proj_loc = gl.getUniformLocation(program, "u_proj");
         gl.uniformMatrix4fv(proj_loc, false, new Float32Array(camera.projMatrix().all()));
 
-        // set eye uniform
-        const eye_loc = gl.getUniformLocation(program, "u_eye");
-        gl.uniform3fv(eye_loc, new Float32Array(camera.pos().xyz));
+        // set plane f uniform
+        const plane_f_loc = gl.getUniformLocation(program, "u_plane_f");
+        gl.uniform1f(plane_f_loc, Plane.F);
 
-        // bind transfer function texture
-        const bg_loc = gl.getUniformLocation(program, 'u_bg_color');
-        gl.uniform4fv(bg_loc, new Float32Array(bg.rgba));
+        // set plane s uniform
+        const plane_s_loc = gl.getUniformLocation(program, "u_plane_s");
+        gl.uniform1f(plane_s_loc, Plane.S);
+
+        // set light uniform
+        const light_loc = gl.getUniformLocation(program, "u_light");
+        gl.uniform3fv(light_loc, new Float32Array(light.xyz));
+
+        // set volume uniform
+        if (texture3d) {
+            const volume_loc = gl.getUniformLocation(program, 'u_volume');
+            gl.activeTexture(gl.TEXTURE0);
+            gl.bindTexture(gl.TEXTURE_3D, texture3d);
+            gl.generateMipmap(gl.TEXTURE_3D);
+            gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.uniform1i(volume_loc, 0);
+        }
     }
 }
 const _3D_VERT =
@@ -136,7 +152,6 @@ precision highp float;
 
 uniform mat4 u_view;
 uniform mat4 u_proj;
-uniform vec3 u_eye;
 
 in vec4 a_norm;
 in vec4 a_pos;
@@ -144,15 +159,11 @@ in vec2 a_uv;
 
 out vec4 v_norm;
 out vec2 v_uv;
-out vec3 v_eye;
-out vec3 v_ray;
 
 void main() {
     gl_Position = u_proj * u_view * a_pos;
     v_norm = normalize(a_norm);
     v_uv = a_uv;
-    v_eye = u_eye;
-    v_ray = a_pos.xyz - u_eye;
 }
 `;
 
@@ -160,15 +171,69 @@ const _3D_FRAG =
 `#version 300 es
 precision highp float;
 
+uniform float u_plane_f;
+uniform float u_plane_s;
+uniform vec3 u_light;
+uniform highp sampler3D u_volume;
+
 in vec4 v_norm;
 in vec2 v_uv;
-in vec3 v_eye;
-in vec3 v_ray;
 
 out vec4 fragColor;
 
-void main() {   
-    vec4 my_color = vec4(0.0, 1.0, 0.0, 1.0);
+vec2 intersect_box(vec3 orig, vec3 dir) {
+	const vec3 box_min = vec3(-0.5, -0.5, -0.5);
+	const vec3 box_max = vec3(0.5, 0.5, 0.5);
+	vec3 inv_dir = 1.0 / dir;
+	vec3 tmin_tmp = (box_min - orig) * inv_dir;
+	vec3 tmax_tmp = (box_max - orig) * inv_dir;
+	vec3 tmin = min(tmin_tmp, tmax_tmp);
+	vec3 tmax = max(tmin_tmp, tmax_tmp);
+	float t0 = max(tmin.x, max(tmin.y, tmin.z));
+	float t1 = min(tmax.x, min(tmax.y, tmax.z));
+	return vec2(t0, t1);
+}
+
+void main() {
+    vec2 world_uv = 2.0 * u_plane_s * v_uv - u_plane_s;
+    vec3 ori = vec3(world_uv.x, u_plane_f, world_uv.y);
+    vec3 dir = normalize(ori - u_light);
+    vec2 t_hit = intersect_box(ori, dir);
+    vec4 my_color = vec4(0.0, 0.0, 0.0, 0.0);
+    
+    // march through volume to check for any intersections
+    if (t_hit.x <= t_hit.y) {
+
+        float dt = 0.0005;
+
+        vec3 p = ori + t_hit.x * dir;
+        for (float t = t_hit.x; t < t_hit.y; t += dt) {
+
+            vec3 pos = p+0.5;
+            vec4 rgba = texture(u_volume, pos);
+    
+            // if miss -> hit bg
+            if (rgba.a == 0.0 && my_color.a > 0.0) {
+                p += dir * dt;
+                continue;
+            }
+    
+            my_color.rgb += (1.0 - my_color.a) * rgba.a * rgba.rgb;
+            my_color.a += (1.0 - my_color.a) * rgba.a;
+    
+            if (my_color.a >= 0.95) {
+                my_color.a = 1.0;
+                break;
+            }
+            p += dir * dt;
+        }
+
+        // shadow if no voxels hit
+        if (my_color != vec4(0.0)) {
+            my_color = vec4(0.0, 0.0, 0.0, 1.0);
+        }
+    }
+
     fragColor = my_color;
 }
 `;

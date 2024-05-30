@@ -58,9 +58,6 @@ class RenderCube {
         gl.activeTexture(gl.TEXTURE1);
         gl.bindTexture(gl.TEXTURE_2D, this.func);
         gl.uniform1i(func_loc, 1);
-
-        // init setup cube render
-        // this.setup_cube_render(gl, );
     }
 
     render(w: number, h: number, camera: Camera, bg: Vec4, texture3d?: WebGLTexture) {
@@ -260,9 +257,9 @@ void main() {
         p += ray * dt;
     }
 
-    // set color to u_bg_color if no voxels hit
+    // discard if no voxels hit
     if (my_color == vec4(0.0)) {
-        my_color = u_bg_color;
+        discard;
     }
 
     // add bg color
