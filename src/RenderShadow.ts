@@ -1,23 +1,20 @@
-import { Camera, Cube, Vec4 } from './lib/rary'
+import { Camera, Plane, Vec4 } from './lib/rary'
 
-export { RenderCube }
+export { RenderShadow }
 
-class RenderCube {
-
-    cube: Cube
+class RenderShadow 
+{
+    plane: Plane
     gl: WebGL2RenderingContext
     program: WebGLProgram
     vao: WebGLVertexArrayObject
-    func: WebGLTexture | null
-    blend_volume: boolean = false
 
     constructor(_gl: WebGL2RenderingContext) {
-        this.cube = new Cube()
+        this.plane = new Plane()
 
         this.gl = _gl;
         this.program = _gl.createProgram() as WebGLProgram
         this.vao = _gl.createVertexArray() as WebGLVertexArrayObject
-        this.func = null
         this.init(_gl)
     }
 
@@ -52,35 +49,26 @@ class RenderCube {
 
         // use program!
         gl.useProgram(this.program);
-
-        // bind transfer function texture
-        const func_loc = gl.getUniformLocation(this.program as WebGLProgram, 'u_func');
-        gl.activeTexture(gl.TEXTURE1);
-        gl.bindTexture(gl.TEXTURE_2D, this.func);
-        gl.uniform1i(func_loc, 1);
-
-        // init setup cube render
-        // this.setup_cube_render(gl, );
     }
 
-    render(w: number, h: number, camera: Camera, bg: Vec4, texture3d?: WebGLTexture) {
+    render(w: number, h: number, camera: Camera, bg: Vec4) {
         let gl = this.gl
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        // gl.clearColor(bg.r, bg.g, bg.b, bg.a);
-        // gl.clear(gl.COLOR_BUFFER_BIT);
-        gl.enable(gl.CULL_FACE);
-        gl.cullFace(gl.FRONT);
+        gl.clearColor(bg.r, bg.g, bg.b, bg.a);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        // gl.enable(gl.CULL_FACE);
+        gl.cullFace(gl.BACK);
         gl.frontFace(gl.CCW);
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
         gl.viewport(0, 0, w, h);
 
-        // setup render cube
-        this.setup_cube_render(gl, camera, bg, texture3d);
+        // setup render plane
+        this.setup_cube_render(gl, camera, bg);
 
         // draw
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-        gl.drawElements(gl.TRIANGLES, this.cube.get_idx_u32().length, gl.UNSIGNED_INT, 0);
+        gl.drawElements(gl.TRIANGLES, this.plane.get_idx_u32().length, gl.UNSIGNED_INT, 0);
     }
 
     setup_cube_render(gl: WebGL2RenderingContext, camera: Camera, bg: Vec4, texture3d?: WebGLTexture) {
@@ -94,14 +82,14 @@ class RenderCube {
         /* Setup Index Buffer */
         const idx_buffer = gl.createBuffer() as WebGLBuffer;
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, idx_buffer);
-        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.cube.get_idx_u32(), gl.STATIC_DRAW);
+        gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.plane.get_idx_u32(), gl.STATIC_DRAW);
 
         /* Setup Attributes */
         // position attribute
         let pos_loc = gl.getAttribLocation(program, 'a_pos');
         const pos_buffer = gl.createBuffer() as WebGLBuffer;
         gl.bindBuffer(gl.ARRAY_BUFFER, pos_buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this.cube.get_pos_f32(), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.plane.get_pos_f32(), gl.STATIC_DRAW);
         gl.vertexAttribPointer(pos_loc, 4, gl.FLOAT, false, 4 * Float32Array.BYTES_PER_ELEMENT, 0);
         gl.vertexAttribDivisor(pos_loc, 0);
         gl.enableVertexAttribArray(pos_loc);
@@ -110,7 +98,7 @@ class RenderCube {
         let norm_loc = gl.getAttribLocation(program, 'a_norm');
         const norm_buffer = gl.createBuffer() as WebGLBuffer;
         gl.bindBuffer(gl.ARRAY_BUFFER, norm_buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this.cube.get_norms_f32(), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.plane.get_norms_f32(), gl.STATIC_DRAW);
         gl.vertexAttribPointer(norm_loc, 4, gl.FLOAT, false, 4 * Float32Array.BYTES_PER_ELEMENT, 0);
         gl.vertexAttribDivisor(norm_loc, 0);
         gl.enableVertexAttribArray(norm_loc);
@@ -119,7 +107,7 @@ class RenderCube {
         let uv_loc = gl.getAttribLocation(program, 'a_uv');
         const uv_buffer = gl.createBuffer() as WebGLBuffer;
         gl.bindBuffer(gl.ARRAY_BUFFER, uv_buffer);
-        gl.bufferData(gl.ARRAY_BUFFER, this.cube.get_uvs_f32(), gl.STATIC_DRAW);
+        gl.bufferData(gl.ARRAY_BUFFER, this.plane.get_uvs_f32(), gl.STATIC_DRAW);
         gl.vertexAttribPointer(uv_loc, 2, gl.FLOAT, false, 2 * Float32Array.BYTES_PER_ELEMENT, 0);
         gl.vertexAttribDivisor(uv_loc, 0);
         gl.enableVertexAttribArray(uv_loc);
@@ -139,29 +127,8 @@ class RenderCube {
         // bind transfer function texture
         const bg_loc = gl.getUniformLocation(program, 'u_bg_color');
         gl.uniform4fv(bg_loc, new Float32Array(bg.rgba));
-
-        // set volume uniform
-        if (texture3d) {
-            const volume_loc = gl.getUniformLocation(program, 'u_volume');
-            gl.activeTexture(gl.TEXTURE0);
-            gl.bindTexture(gl.TEXTURE_3D, texture3d);
-            gl.generateMipmap(gl.TEXTURE_3D);
-            gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-            gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
-            if (this.blend_volume) {
-                gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
-                gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-            }
-            else {
-                gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-                gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-            }
-            gl.uniform1i(volume_loc, 0);
-        }
     }
 }
-
 const _3D_VERT =
 `#version 300 es
 layout(location=0) in vec3 pos;
@@ -193,9 +160,6 @@ const _3D_FRAG =
 `#version 300 es
 precision highp float;
 
-uniform highp sampler3D u_volume;
-uniform vec4 u_bg_color;
-
 in vec4 v_norm;
 in vec2 v_uv;
 in vec3 v_eye;
@@ -203,70 +167,8 @@ in vec3 v_ray;
 
 out vec4 fragColor;
 
-vec2 intersect_box(vec3 orig, vec3 dir) {
-	const vec3 box_min = vec3(-0.5, -0.5, -0.5);
-	const vec3 box_max = vec3(0.5, 0.5, 0.5);
-	vec3 inv_dir = 1.0 / dir;
-	vec3 tmin_tmp = (box_min - orig) * inv_dir;
-	vec3 tmax_tmp = (box_max - orig) * inv_dir;
-	vec3 tmin = min(tmin_tmp, tmax_tmp);
-	vec3 tmax = max(tmin_tmp, tmax_tmp);
-	float t0 = max(tmin.x, max(tmin.y, tmin.z));
-	float t1 = min(tmax.x, min(tmax.y, tmax.z));
-	return vec2(t0, t1);
-}
-
 void main() {   
-    vec4 my_color = vec4(0.0, 0.0, 0.0, 0.0);
-
-    // step 1: normalize ray
-    vec3 ray = normalize(v_ray);
-
-    // step 2: intersect ray with volume, find interval along ray inside volume
-    vec2 t_hit = intersect_box(v_eye, ray);
-    if (t_hit.x > t_hit.y) {
-        discard;
-    }
-
-    // avoid sampling behind eye
-    t_hit.x = max(t_hit.x, 0.0);
-
-    // step 3: set step size to march through volume
-    float dt = 0.0005;
-
-    // step 4: march ray through volume and sample
-    vec3 p = v_eye + t_hit.x * ray;
-    for (float t = t_hit.x; t < t_hit.y; t += dt) {
-        // step 5: sample volume
-        vec3 pos = p+0.5;
-        vec4 rgba = texture(u_volume, pos);
-
-        if (rgba.a <= 0.5)
-            rgba.a *= 0.005;
-
-        // if miss -> hit bg
-        if (rgba.a == 0.0 && my_color.a > 0.0) {
-            p += ray * dt;
-            continue;
-        }
-
-        my_color.rgb += (1.0 - my_color.a) * rgba.a * rgba.rgb;
-        my_color.a += (1.0 - my_color.a) * rgba.a;
-
-        if (my_color.a >= 0.95) {
-            my_color.a = 1.0;
-            break;
-        }
-        p += ray * dt;
-    }
-
-    // set color to u_bg_color if no voxels hit
-    if (my_color == vec4(0.0)) {
-        my_color = u_bg_color;
-    }
-
-    // add bg color
-    my_color.rgba = vec4(u_bg_color.rgb * (1.0 - my_color.a) + (my_color.rgb * my_color.a), 1.0);
+    vec4 my_color = vec4(0.0, 1.0, 0.0, 1.0);
     fragColor = my_color;
 }
 `;

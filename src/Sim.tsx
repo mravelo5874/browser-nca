@@ -3,7 +3,8 @@ import { CanvasResize } from './CanvasResize'
 import { UI } from './UI'
 import { delay } from './Util'
 import { Camera, Vec2, Vec3, Vec4 } from './lib/rary'
-import { RenderCube } from './RenderCube'  
+import { RenderCube } from './RenderCube'
+import { RenderShadow } from './RenderShadow'
 import { cowboy16 } from './data/all'
 
 export { Sim }
@@ -13,7 +14,7 @@ class Sim {
     // simulation components
     paused: boolean
     bg: Vec4;
-    static zoom: number = 3.0;
+    static zoom: number = 1.8;
 
     // render components
     canvas: HTMLCanvasElement | null = null
@@ -22,6 +23,7 @@ class Sim {
     ui: UI | null = null
     camera: Camera | null = null
     rendercube: RenderCube | null = null
+    rendershadow: RenderShadow | null = null
     texture3d: WebGLTexture | null = null;
 
     // user input
@@ -54,6 +56,7 @@ class Sim {
         this.context = webgl_util.request_context(this.canvas)
         this.resize = new CanvasResize(this.canvas)
         this.rendercube = new RenderCube(this.context)
+        this.rendershadow = new RenderShadow(this.context)
         this.reboot_camera()
         this.setup_texture3d()
         console.log('simulation initialized...')
@@ -138,7 +141,7 @@ class Sim {
         // update ui
         if (this.ui) this.ui.update()
 
-        // rotational velocity
+        // camera rotational velocity
         if (!this.is_input && this.prev_d != Vec2.zero) {
             let dx = this.prev_d.x
             let dy = this.prev_d.y
@@ -155,6 +158,7 @@ class Sim {
         let rendercube = this.rendercube as RenderCube
         let w = this.canvas?.width as number
         let h = this.canvas?.height as number
+        this.rendershadow?.render(w, h, camera, this.bg)
         if (this.texture3d) {
             rendercube.render(w, h, camera, this.bg, this.texture3d)
         } else {
