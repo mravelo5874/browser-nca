@@ -1,8 +1,8 @@
 import { webgl_util } from './WebGL_Util'
 import { CanvasResize } from './CanvasResize'
 import { UI } from './UI'
-import { delay, random_uint8_volume } from './Util'
-import { Camera, Vec3, Vec4 } from './lib/rary'
+import { delay } from './Util'
+import { Camera, Vec2, Vec3, Vec4 } from './lib/rary'
 import { RenderCube } from './RenderCube'  
 import { cowboy16 } from './data/all'
 
@@ -28,10 +28,12 @@ class Sim {
     is_input: boolean = false
     mouse_button: number = 0
     cam_sense: number = 0.25
-    rot_speed: number = 0.01
+    rot_speed: number = 4
+    rot_fric: number = 0.99
     zoom_speed: number = 0.002
     min_zoom: number = 0.0
     max_zoom: number = 8.0
+    prev_d: Vec2 = Vec2.zero
 
     // used to calculate time and fps
     fps: number = 0;
@@ -136,6 +138,14 @@ class Sim {
         // update ui
         if (this.ui) this.ui.update()
 
+        // rotational velocity
+        if (!this.is_input && this.prev_d != Vec2.zero) {
+            let dx = this.prev_d.x
+            let dy = this.prev_d.y
+            this.orbit_cube(dx, dy);
+            this.prev_d = new Vec2(this.prev_d.scale(this.rot_fric).xy)
+        }
+
         // request next frame to be drawn
         window.requestAnimationFrame(() => this.render_loop())
     }
@@ -159,24 +169,25 @@ class Sim {
     mouse_start(x: number, y: number, button: number) {
         this.is_input = true
         this.mouse_button = button;
+        this.prev_d = new Vec2([0.0, 0.0])
         switch (this.mouse_button) {
         default: break
         case 1:
-            this.reboot_camera()
+            
             break
         case 2:
+            this.reboot_camera()
             break
         }
     }
 
     mouse_drag(x: number, y: number, dx: number, dy: number) {
-        // move camera with mouse
-        this.orbit_cube(dx, dy);
-        
-        if (!this.is_input) return
         switch (this.mouse_button) {
         default: break
         case 1:
+            if (!this.is_input) return
+            this.prev_d = new Vec2([dx, dy])
+            this.orbit_cube(dx, dy);
             break
         case 2:
             break
@@ -199,7 +210,7 @@ class Sim {
         let dir = this.camera.right();
         dir.scale(-dx);
         dir.add(this.camera.up().scale(dy));
-        dir.normalize();
+        //dir.normalize();
 
         // move camera
         let rotAxis: Vec3 = Vec3.cross(this.camera.forward(), dir);
@@ -207,7 +218,7 @@ class Sim {
 
         // make sure values are not NaN
         if (dy !== 0 || dx !== 0) {
-            this.camera.orbitTarget(rotAxis, this.rot_speed);
+            this.camera.orbitTarget(rotAxis, this.rot_speed * Math.sqrt(dx*dx+dy*dy));
         }
     }
 

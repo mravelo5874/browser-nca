@@ -1,4 +1,3 @@
-import { Sim } from './Sim';
 import { UI } from './UI' 
 
 export { CanvasResize };
