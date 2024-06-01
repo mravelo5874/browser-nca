@@ -1,11 +1,17 @@
 import { webgl_util } from './WebGL_Util'
 import { CanvasResize } from './CanvasResize'
 import { UI } from './UI'
-import { delay } from './Util'
+import { delay, random_uint8_volume } from './Util'
 import { Camera, Vec2, Vec3, Vec4 } from './lib/rary'
 import { RenderCube } from './RenderCube'
 import { RenderShadow } from './RenderShadow'
 import { cowboy16, earth, oak } from './data/all'
+
+// [TODO]
+//      - postprocess antialiasing using WebGLRenderTargets (https://discourse.threejs.org/t/how-to-get-canvas-as-a-texture-to-chain-together-shaders/16056)
+//      - load in nca models and run asynchronously
+//      - read in data from running models for rendering
+//      - fix lighting engine (large alpha values through volume into plane are too dark)
 
 export { Sim }
 
@@ -73,8 +79,8 @@ class Sim {
 
     setup_texture3d() {
         let gl = this.context as WebGL2RenderingContext
-        let size = 16
-        let data = new Uint8Array(cowboy16) //random_uint8_volume(size, size, size, 'thisisaseedforarandomnumbergenerator', 0.7)
+        let size = 24
+        let data = new Uint8Array(oak) // random_uint8_volume(size, size, size, 'thisisaseedforarandomnumbergenerator', 0.7) // 
         this.texture3d = gl.createTexture() as WebGLTexture
         gl.bindTexture(gl.TEXTURE_3D, this.texture3d);
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -154,7 +160,8 @@ class Sim {
         }
 
         // move light source
-        this.light_pos = new Vec3([Math.sin(curr_time*0.00005)*3, 2, Math.cos(curr_time*0.00005)*3])
+        let light_vel = 0.001// 0.00005
+        this.light_pos = new Vec3([Math.sin(curr_time*light_vel)*2, 2, Math.cos(curr_time*light_vel)*2])
 
         // request next frame to be drawn
         window.requestAnimationFrame(() => this.render_loop())

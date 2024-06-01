@@ -85,7 +85,8 @@ export class webgl_util
     ): WebGL2RenderingContext {
       /* Request WebGL Context */
       let ctx: WebGL2RenderingContext = canvas.getContext("webgl2", {
-        preserveDrawingBuffer: true
+        antialias: true,
+        preserveDrawingBuffer: true,
       }) as WebGL2RenderingContext;
   
       if (!ctx) {

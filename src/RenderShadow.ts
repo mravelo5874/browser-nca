@@ -211,7 +211,7 @@ void main() {
     // march through volume to check for any intersections
     if (t_hit.x <= t_hit.y) {
 
-        float dt = 0.0005;
+        float dt = 0.01;
 
         vec3 p = ori + t_hit.x * dir;
         for (float t = t_hit.x; t < t_hit.y; t += dt) {
@@ -239,7 +239,7 @@ void main() {
         // shadow if no voxels hit
         if (my_color != vec4(0.0)) {
             float ldist = distance(ori, u_light);
-            float shadow_intensity = 0.05;
+            float shadow_intensity = 0.2;
             float light = 1.0 - (ldist / u_light_rad) - shadow_intensity;
             my_color = vec4(light, light, light, 1.0);
         }

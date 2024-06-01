@@ -245,10 +245,9 @@ void main() {
         vec3 pos = p+0.5;
         float ldist =  distance(pos-0.5, u_light) - light_dist;
         vec4 rgba = texture(u_volume, pos);
-        rgba.rgb *= (1.0 - ldist);
+        rgba.rgb *= 1.0 - ldist;
         
-
-        if (rgba.a <= 0.5)
+        if (rgba.a <= 0.6)
             rgba.a *= 0.005;
 
         // if miss -> hit bg
