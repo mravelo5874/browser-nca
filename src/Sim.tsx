@@ -5,7 +5,7 @@ import { delay } from './Util'
 import { Camera, Vec2, Vec3, Vec4 } from './lib/rary'
 import { RenderCube } from './RenderCube'
 import { RenderShadow } from './RenderShadow'
-import { cowboy16 } from './data/all'
+import { cowboy16, earth, oak } from './data/all'
 
 export { Sim }
 
@@ -14,7 +14,8 @@ class Sim {
     // simulation components
     paused: boolean
     bg: Vec4
-    light: Vec3
+    light_pos: Vec3
+    light_radius: number
     static zoom: number = 1.8
 
     // render components
@@ -48,8 +49,9 @@ class Sim {
 
     constructor() {
         this.paused = false
-        this.bg = new Vec4([1.0, 1.0, 1.0, 1.0])
-        this.light = new Vec3([2, 2, -2])
+        this.bg = new Vec4([0.0, 0.0, 0.0, 1.0])
+        this.light_pos = new Vec3([2, 2, -2])
+        this.light_radius = 16.0
         console.log('simulation constructed...')
     }
 
@@ -152,7 +154,7 @@ class Sim {
         }
 
         // move light source
-        this.light = new Vec3([Math.sin(curr_time*0.001)*2, 2, Math.cos(curr_time*0.001)*-2])
+        this.light_pos = new Vec3([Math.sin(curr_time*0.00005)*3, 2, Math.cos(curr_time*0.00005)*3])
 
         // request next frame to be drawn
         window.requestAnimationFrame(() => this.render_loop())
@@ -163,11 +165,11 @@ class Sim {
         let w = this.canvas?.width as number
         let h = this.canvas?.height as number
         if (this.texture3d) {
-            this.rendershadow?.render(w, h, camera, this.bg, this.light, this.texture3d)
-            this.rendercube?.render(w, h, camera, this.bg, this.texture3d)
+            this.rendershadow?.render(w, h, camera, this.bg, this.light_pos, this.light_radius, this.texture3d)
+            this.rendercube?.render(w, h, camera, this.bg,this.light_pos, this.texture3d)
         } else {
-            this.rendershadow?.render(w, h, camera, this.bg, this.light)
-            this.rendercube?.render(w, h, camera, this.bg)
+            this.rendershadow?.render(w, h, camera, this.bg, this.light_pos, this.light_radius)
+            this.rendercube?.render(w, h, camera, this.bg, this.light_pos)
         }
     }
 

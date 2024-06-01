@@ -51,7 +51,7 @@ class RenderShadow
         gl.useProgram(this.program);
     }
 
-    render(w: number, h: number, camera: Camera, bg: Vec4, light: Vec3, texture3d?: WebGLTexture) {
+    render(w: number, h: number, camera: Camera, bg: Vec4, light: Vec3, light_radius: number, texture3d?: WebGLTexture) {
         let gl = this.gl
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.clearColor(bg.r, bg.g, bg.b, bg.a);
@@ -64,14 +64,14 @@ class RenderShadow
         gl.viewport(0, 0, w, h);
 
         // setup render plane
-        this.setup_plane_render(gl, camera, bg, light, texture3d);
+        this.setup_plane_render(gl, camera, bg, light, light_radius, texture3d);
 
         // draw
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.drawElements(gl.TRIANGLES, this.plane.get_idx_u32().length, gl.UNSIGNED_INT, 0);
     }
 
-    setup_plane_render(gl: WebGL2RenderingContext, camera: Camera, bg: Vec4, light: Vec3, texture3d?: WebGLTexture) {
+    setup_plane_render(gl: WebGL2RenderingContext, camera: Camera, bg: Vec4, light: Vec3, light_radius: number, texture3d?: WebGLTexture) {
         let program = this.program as WebGLProgram;
         
         // draw cube
@@ -132,6 +132,10 @@ class RenderShadow
         const light_loc = gl.getUniformLocation(program, "u_light");
         gl.uniform3fv(light_loc, new Float32Array(light.xyz));
 
+        // set light radius uniform
+        const light_rad_loc = gl.getUniformLocation(program, "u_light_rad");
+        gl.uniform1f(light_rad_loc, light_radius);
+
         // set volume uniform
         if (texture3d) {
             const volume_loc = gl.getUniformLocation(program, 'u_volume');
@@ -141,6 +145,8 @@ class RenderShadow
             gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_R, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
             gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+            gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+            gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
             gl.uniform1i(volume_loc, 0);
         }
     }
@@ -174,6 +180,7 @@ precision highp float;
 uniform float u_plane_f;
 uniform float u_plane_s;
 uniform vec3 u_light;
+uniform float u_light_rad;
 uniform highp sampler3D u_volume;
 
 in vec4 v_norm;
@@ -217,6 +224,7 @@ void main() {
                 p += dir * dt;
                 continue;
             }
+
     
             my_color.rgb += (1.0 - my_color.a) * rgba.a * rgba.rgb;
             my_color.a += (1.0 - my_color.a) * rgba.a;
@@ -230,8 +238,17 @@ void main() {
 
         // shadow if no voxels hit
         if (my_color != vec4(0.0)) {
-            my_color = vec4(0.0, 0.0, 0.0, 1.0);
+            float ldist = distance(ori, u_light);
+            float shadow_intensity = 0.05;
+            float light = 1.0 - (ldist / u_light_rad) - shadow_intensity;
+            my_color = vec4(light, light, light, 1.0);
         }
+    }
+    
+    if (my_color.a < 0.1) {
+        float ldist = distance(ori, u_light);
+        float light = 1.0 - (ldist / u_light_rad);
+        my_color = vec4(light, light, light, 1.0);
     }
 
     fragColor = my_color;

@@ -1,4 +1,4 @@
-import { Camera, Cube, Vec4 } from './lib/rary'
+import { Camera, Cube, Vec3, Vec4 } from './lib/rary'
 
 export { RenderCube }
 
@@ -60,7 +60,7 @@ class RenderCube {
         gl.uniform1i(func_loc, 1);
     }
 
-    render(w: number, h: number, camera: Camera, bg: Vec4, texture3d?: WebGLTexture) {
+    render(w: number, h: number, camera: Camera, bg: Vec4, light: Vec3, texture3d?: WebGLTexture) {
         let gl = this.gl
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         // gl.clearColor(bg.r, bg.g, bg.b, bg.a);
@@ -73,14 +73,14 @@ class RenderCube {
         gl.viewport(0, 0, w, h);
 
         // setup render cube
-        this.setup_cube_render(gl, camera, bg, texture3d);
+        this.setup_cube_render(gl, camera, bg, light, texture3d);
 
         // draw
         gl.bindFramebuffer(gl.FRAMEBUFFER, null);
         gl.drawElements(gl.TRIANGLES, this.cube.get_idx_u32().length, gl.UNSIGNED_INT, 0);
     }
 
-    setup_cube_render(gl: WebGL2RenderingContext, camera: Camera, bg: Vec4, texture3d?: WebGLTexture) {
+    setup_cube_render(gl: WebGL2RenderingContext, camera: Camera, bg: Vec4, light: Vec3, texture3d?: WebGLTexture) {
         let program = this.program as WebGLProgram;
         
         // draw cube
@@ -137,6 +137,10 @@ class RenderCube {
         const bg_loc = gl.getUniformLocation(program, 'u_bg_color');
         gl.uniform4fv(bg_loc, new Float32Array(bg.rgba));
 
+        // set light uniform
+        const light_loc = gl.getUniformLocation(program, "u_light");
+        gl.uniform3fv(light_loc, new Float32Array(light.xyz));
+
         // set volume uniform
         if (texture3d) {
             const volume_loc = gl.getUniformLocation(program, 'u_volume');
@@ -190,6 +194,7 @@ const _3D_FRAG =
 `#version 300 es
 precision highp float;
 
+uniform vec3 u_light;
 uniform highp sampler3D u_volume;
 uniform vec4 u_bg_color;
 
@@ -231,12 +236,17 @@ void main() {
     // step 3: set step size to march through volume
     float dt = 0.0005;
 
+    float light_dist = length(u_light) - 0.5;
+
     // step 4: march ray through volume and sample
     vec3 p = v_eye + t_hit.x * ray;
     for (float t = t_hit.x; t < t_hit.y; t += dt) {
         // step 5: sample volume
         vec3 pos = p+0.5;
+        float ldist =  distance(pos-0.5, u_light) - light_dist;
         vec4 rgba = texture(u_volume, pos);
+        rgba.rgb *= (1.0 - ldist);
+        
 
         if (rgba.a <= 0.5)
             rgba.a *= 0.005;
