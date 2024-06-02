@@ -6,6 +6,7 @@ import { Camera, Vec2, Vec3, Vec4 } from './lib/rary'
 import { RenderCube } from './RenderCube'
 import { RenderShadow } from './RenderShadow'
 import { cowboy16, earth, oak } from './data/all'
+import { NCA } from './NCA'
 
 // [TODO]
 //      - postprocess antialiasing using WebGLRenderTargets (https://discourse.threejs.org/t/how-to-get-canvas-as-a-texture-to-chain-together-shaders/16056)
@@ -33,6 +34,7 @@ class Sim {
     rendercube: RenderCube | null = null
     rendershadow: RenderShadow | null = null
     texture3d: WebGLTexture | null = null
+    nca: NCA
 
     // user input
     is_input: boolean = false
@@ -58,6 +60,10 @@ class Sim {
         this.bg = new Vec4([0.0, 0.0, 0.0, 1.0])
         this.light_pos = new Vec3([2, 2, -2])
         this.light_radius = 16.0
+        this.nca = new NCA();
+
+        this.nca.load_model('oak_aniso')
+        
         console.log('simulation constructed...')
     }
 
@@ -79,8 +85,8 @@ class Sim {
 
     setup_texture3d() {
         let gl = this.context as WebGL2RenderingContext
-        let size = 24
-        let data = new Uint8Array(oak) // random_uint8_volume(size, size, size, 'thisisaseedforarandomnumbergenerator', 0.7) // 
+        let size = 16
+        let data = new Uint8Array(cowboy16) // random_uint8_volume(size, size, size, 'thisisaseedforarandomnumbergenerator', 0.7) // 
         this.texture3d = gl.createTexture() as WebGLTexture
         gl.bindTexture(gl.TEXTURE_3D, this.texture3d);
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -152,7 +158,7 @@ class Sim {
         if (this.ui) this.ui.update()
 
         // camera rotational velocity
-        if (!this.is_input && this.prev_d != Vec2.zero) {
+        if (!this.is_input && this.prev_d !== Vec2.zero) {
             let dx = this.prev_d.x
             let dy = this.prev_d.y
             this.orbit_cube(dx, dy);
