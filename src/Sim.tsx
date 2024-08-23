@@ -5,7 +5,7 @@ import { delay, random_uint8_volume } from './Util'
 import { Camera, Vec2, Vec3, Vec4 } from './lib/rary'
 import { RenderCube } from './RenderCube'
 import { RenderShadow } from './RenderShadow'
-import { cowboy16, earth, oak } from './data/all'
+import { cowboy16, earth, oak, oak_seed } from './data/all'
 import { NCA } from './NCA'
 
 // [TODO]
@@ -57,14 +57,24 @@ class Sim {
     prev_fps_time: number = 0
     frame_count: number = 0
 
+    oak_data = {
+        'model': 'oak_aniso',
+        'size': 32,
+        'seed': new Float32Array(oak_seed)
+    }
+
     constructor() {
         this.paused = false
         this.bg = new Vec4([0.0, 0.0, 0.0, 1.0])
         this.light_pos = new Vec3([2, 2, -2])
         this.light_radius = 16.0
-        this.nca = new NCA();
-
-        this.nca.load_model('oak_aniso', 32)
+        this.nca = new NCA()
+        
+        this.nca.load_model(
+            this.oak_data['model'],
+            this.oak_data['size'],
+            this.oak_data['seed'],
+        )
         console.log('simulation constructed...')
     }
 
@@ -75,7 +85,7 @@ class Sim {
         this.rendercube = new RenderCube(this.context)
         this.rendershadow = new RenderShadow(this.context)
         this.reboot_camera()
-        this.setup_texture3d()
+        // this.setup_texture3d()
         console.log('simulation initialized...')
     }
 
@@ -86,8 +96,8 @@ class Sim {
 
     setup_texture3d() {
         let gl = this.context as WebGL2RenderingContext
-        let size = 24
-        let data = new Uint8Array(oak) // random_uint8_volume(size, size, size, 'thisisaseedforarandomnumbergenerator', 0.7) // 
+        let size = this.oak_data['size']
+        let data = this.nca.get_state() //new Uint8Array(oak) // random_uint8_volume(size, size, size, 'thisisaseedforarandomnumbergenerator', 0.7) //
         this.texture3d = gl.createTexture() as WebGLTexture
         gl.bindTexture(gl.TEXTURE_3D, this.texture3d);
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -169,6 +179,12 @@ class Sim {
         // move light source
         let light_vel = 0.001// 0.00005
         this.light_pos = new Vec3([Math.sin(curr_time*light_vel)*2, 2, Math.cos(curr_time*light_vel)*2])
+
+        // TODO: make this into worker thread later
+        if (this.nca.is_ready()) {
+            this.nca.run_model()
+            this.setup_texture3d()
+        }
 
         // request next frame to be drawn
         window.requestAnimationFrame(() => this.render_loop())
