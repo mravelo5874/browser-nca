@@ -13,6 +13,8 @@ import { NCA } from './NCA'
 //      - load in nca models and run asynchronously
 //      - read in data from running models for rendering
 //      - fix lighting engine (large alpha values through volume into plane are too dark)
+//      - reset NCA model every X steps (by default)
+//      - add ability to add delay to model steps (to view model grow slower or in real-time)
 
 export { Sim }
 
@@ -62,8 +64,7 @@ class Sim {
         this.light_radius = 16.0
         this.nca = new NCA();
 
-        this.nca.load_model('oak_aniso')
-        
+        this.nca.load_model('oak_aniso', 32)
         console.log('simulation constructed...')
     }
 
@@ -85,8 +86,8 @@ class Sim {
 
     setup_texture3d() {
         let gl = this.context as WebGL2RenderingContext
-        let size = 16
-        let data = new Uint8Array(cowboy16) // random_uint8_volume(size, size, size, 'thisisaseedforarandomnumbergenerator', 0.7) // 
+        let size = 24
+        let data = new Uint8Array(oak) // random_uint8_volume(size, size, size, 'thisisaseedforarandomnumbergenerator', 0.7) // 
         this.texture3d = gl.createTexture() as WebGLTexture
         gl.bindTexture(gl.TEXTURE_3D, this.texture3d);
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
