@@ -49,6 +49,14 @@ class Sim {
     max_zoom: number = 8.0
     prev_d: Vec2 = Vec2.zero
 
+    // auto restart feature
+    auto_restart: boolean = true
+    auto_restart_steps: number = 100
+    auto_restart_count: number = 0
+
+    // key input dictionary
+    key_down: Record<string, boolean>
+
     // used to calculate time and fps
     fps: number = 0
     start_time: number = 0
@@ -64,6 +72,7 @@ class Sim {
     }
 
     constructor() {
+        this.key_down = {}
         this.paused = false
         this.bg = new Vec4([0.0, 0.0, 0.0, 1.0])
         this.light_pos = new Vec3([2, 2, -2])
@@ -92,6 +101,11 @@ class Sim {
     start() {
         window.requestAnimationFrame(() => this.render_loop())
         console.log('simulation started...')
+    }
+
+    public get_key(key: string): boolean {
+        if (!this.key_down[key]) return false
+        else return this.key_down[key]
     }
 
     async setup_texture3d() {
@@ -179,6 +193,21 @@ class Sim {
         // move light source
         let light_vel = 0.00005
         this.light_pos = new Vec3([Math.sin(curr_time*light_vel)*2, 2, Math.cos(curr_time*light_vel)*2])
+
+        // auto restart
+        let reset = false
+        if (this.auto_restart) {
+            this.auto_restart_count += 1
+            if (this.auto_restart_steps == this.auto_restart_count) {
+                this.auto_restart_count = 0
+                reset = true
+            }
+        }
+
+        // get key inputs
+        if (this.get_key('KeyR') || reset) {
+            this.nca.reset()
+        }
 
         // TODO: make this into worker thread later
         if (this.nca.is_ready()) {

@@ -17,3 +17,12 @@ export function random_uint8_volume(width: number, depth: number, height: number
     }
     return array
 }
+
+export function create_dummy_array(size: number, seed: string = '0123456789') {
+    let array = []
+    let rng = new Rand(seed)
+    for (let i = 0; i < size; i++) {
+        array.push(rng.next())
+    }
+    return new Float32Array(array)
+}

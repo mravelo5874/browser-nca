@@ -83,6 +83,16 @@ class Canvas extends React.Component<CanvasInterface, {}> {
         sim.mouse_wheel(wheel.deltaY)
     }
 
+    private on_key_down(key: KeyboardEvent) {
+        let sim = this.props.sim
+        sim.key_down[key.code] = true
+    }
+
+    private on_key_up(key: KeyboardEvent) {
+        let sim = this.props.sim
+        sim.key_down[key.code] = false
+    }
+
     componentDidMount = () => {
         // only initialize simulation once
         if (!this.comp_mounted) {
@@ -97,6 +107,10 @@ class Canvas extends React.Component<CanvasInterface, {}> {
             canvas.addEventListener('mousemove', (mouse: MouseEvent) => this.mouse_drag(mouse))
             canvas.addEventListener('mouseup', (mouse: MouseEvent) => this.mouse_end(mouse))
             canvas.addEventListener('wheel', (event: WheelEvent) => this.mouse_wheel(event))
+
+            // event listeners for keyboard input
+            window.addEventListener("keydown", (key: KeyboardEvent) => this.on_key_down(key));
+            window.addEventListener("keyup", (key: KeyboardEvent) => this.on_key_up(key));
 
             // setup simulation
             let sim = this.props.sim
