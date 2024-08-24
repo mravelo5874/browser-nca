@@ -247,7 +247,7 @@ void main() {
         vec4 rgba = texture(u_volume, pos);
         rgba.rgb *= 1.0 - ldist;
         
-        if (rgba.a <= 0.6)
+        if (rgba.a <= 0.5)
             rgba.a *= 0.005;
 
         // if miss -> hit bg

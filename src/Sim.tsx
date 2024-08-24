@@ -94,10 +94,10 @@ class Sim {
         console.log('simulation started...')
     }
 
-    setup_texture3d() {
+    async setup_texture3d() {
         let gl = this.context as WebGL2RenderingContext
         let size = this.oak_data['size']
-        let data = this.nca.get_state() //new Uint8Array(oak) // random_uint8_volume(size, size, size, 'thisisaseedforarandomnumbergenerator', 0.7) //
+        let data = await this.nca.get_state() //new Uint8Array(oak) // random_uint8_volume(size, size, size, 'thisisaseedforarandomnumbergenerator', 0.7) //
         this.texture3d = gl.createTexture() as WebGLTexture
         gl.bindTexture(gl.TEXTURE_3D, this.texture3d);
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -177,7 +177,7 @@ class Sim {
         }
 
         // move light source
-        let light_vel = 0.001// 0.00005
+        let light_vel = 0.00005
         this.light_pos = new Vec3([Math.sin(curr_time*light_vel)*2, 2, Math.cos(curr_time*light_vel)*2])
 
         // TODO: make this into worker thread later

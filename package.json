@@ -11,6 +11,7 @@
     "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0",
     "cors": "^2.8.5",
+    "onnx-proto": "^8.0.1",
     "onnxjs": "^0.1.8",
     "onnxruntime-node": "^1.19.0",
     "onnxruntime-web": "^1.19.0",
