@@ -5,7 +5,6 @@ import { delay, random_uint8_volume } from './Util'
 import { Camera, Vec2, Vec3, Vec4 } from './lib/rary'
 import { RenderCube } from './RenderCube'
 import { RenderShadow } from './RenderShadow'
-import { cowboy16, earth, oak, oak_seed } from './data/all'
 import { NCA } from './NCA'
 
 // [TODO]
@@ -49,9 +48,12 @@ class Sim {
     max_zoom: number = 8.0
     prev_d: Vec2 = Vec2.zero
 
+    // delete later
+    start_model: boolean = false
+
     // auto restart feature
     auto_restart: boolean = true
-    auto_restart_steps: number = 100
+    auto_restart_steps: number = 1000
     auto_restart_count: number = 0
 
     // key input dictionary
@@ -65,28 +67,19 @@ class Sim {
     prev_fps_time: number = 0
     frame_count: number = 0
 
-    oak_data = {
-        'model': 'oak_aniso',
-        'size': 32,
-        'seed': new Float32Array(oak_seed)
-    }
-
     constructor() {
         this.key_down = {}
         this.paused = false
         this.bg = new Vec4([0.0, 0.0, 0.0, 1.0])
         this.light_pos = new Vec3([2, 2, -2])
         this.light_radius = 16.0
+
+        // * setup NCA
         this.nca = new NCA()
-        
-        this.nca.load_model(
-            this.oak_data['model'],
-            this.oak_data['size'],
-            this.oak_data['seed'],
-        )
+        this.nca.load_model_worker('oak')
         console.log('simulation constructed...')
     }
-
+    
     init(_canvas: HTMLCanvasElement) {
         this.canvas = _canvas
         this.context = webgl_util.request_context(this.canvas)
@@ -94,7 +87,6 @@ class Sim {
         this.rendercube = new RenderCube(this.context)
         this.rendershadow = new RenderShadow(this.context)
         this.reboot_camera()
-        // this.setup_texture3d()
         console.log('simulation initialized...')
     }
 
@@ -108,10 +100,8 @@ class Sim {
         else return this.key_down[key]
     }
 
-    async setup_texture3d() {
+    async setup_texture3d(rgba_data: Uint8Array, size: number) {
         let gl = this.context as WebGL2RenderingContext
-        let size = this.oak_data['size']
-        let data = await this.nca.get_state() //new Uint8Array(oak) // random_uint8_volume(size, size, size, 'thisisaseedforarandomnumbergenerator', 0.7) //
         this.texture3d = gl.createTexture() as WebGLTexture
         gl.bindTexture(gl.TEXTURE_3D, this.texture3d);
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -119,7 +109,7 @@ class Sim {
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_S, gl.REPEAT);
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_T, gl.REPEAT);
         gl.texParameteri(gl.TEXTURE_3D, gl.TEXTURE_WRAP_R, gl.REPEAT);
-        gl.texImage3D(gl.TEXTURE_3D, 0, gl.RGBA, size, size, size, 0, gl.RGBA, gl.UNSIGNED_BYTE, data)
+        gl.texImage3D(gl.TEXTURE_3D, 0, gl.RGBA, size, size, size, 0, gl.RGBA, gl.UNSIGNED_BYTE, rgba_data)
     }
 
     reset_camera () {
@@ -150,7 +140,7 @@ class Sim {
     }
 
     render_loop() {
-        // update canvas size
+        // * update canvas size
         if (CanvasResize.update_canvas) {
             console.log('update canvas!')
             CanvasResize.update_canvas = false
@@ -163,26 +153,26 @@ class Sim {
             })();
         }
 
-        // render current simulation
+        // * render current simulation
         this.render_frame()
 
-        // calculate current delta time
+        // * calculate current delta time
         this.frame_count++
         const curr_time: number = Date.now()
         this.curr_delta_time = (curr_time - this.prev_time)
         this.prev_time = curr_time
 
-        // calculate fps
+        // * calculate fps
         if (Date.now() - this.prev_fps_time >= 1000) {
             this.fps = this.frame_count
             this.frame_count = 0
             this.prev_fps_time = Date.now()
         }
         
-        // update ui
+        // * update ui
         if (this.ui) this.ui.update()
 
-        // camera rotational velocity
+        // * camera rotational velocity
         if (!this.is_input && this.prev_d !== Vec2.zero) {
             let dx = this.prev_d.x
             let dy = this.prev_d.y
@@ -190,11 +180,11 @@ class Sim {
             this.prev_d = new Vec2(this.prev_d.scale(this.rot_fric).xy)
         }
 
-        // move light source
+        // * move light source
         let light_vel = 0.00005
         this.light_pos = new Vec3([Math.sin(curr_time*light_vel)*2, 2, Math.cos(curr_time*light_vel)*2])
 
-        // auto restart
+        // * auto restart calculation
         let reset = false
         if (this.auto_restart) {
             this.auto_restart_count += 1
@@ -204,15 +194,19 @@ class Sim {
             }
         }
 
-        // get key inputs
+        // * reset model ELSE update model
         if (this.get_key('KeyR') || reset) {
             this.nca.reset()
         }
+        else {
+            this.nca.update()
+        }
 
-        // TODO: make this into worker thread later
-        if (this.nca.is_ready()) {
-            this.nca.run_model()
-            this.setup_texture3d()
+        // get rbga data from NCA worker
+        const rgba_data = this.nca.get_rgba()
+        const size = this.nca.get_size()
+        if (rgba_data && size) {
+            this.setup_texture3d(rgba_data, size)
         }
 
         // request next frame to be drawn
