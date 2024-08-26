@@ -18,7 +18,6 @@ class NCA
 {
     private transpose: ort.InferenceSession | null = null
     private state: Float32Array | null = null
-    private seed: Float32Array | null = null
     private size: number | null = null
 
     private worker: Worker | null = null
@@ -26,6 +25,7 @@ class NCA
 
     private worker_ready: boolean = false
     private worker_running: boolean = false
+    private worker_steps: number = 0
     private rgba: Uint8Array | null = null
 
     constructor () { 
@@ -40,11 +40,11 @@ class NCA
         }
         // * terinate current worker
         this.terminate()
+        this.worker_steps = 0
         // * init model worker
         switch(model) {
         case 'oak':
             this.size = oak_data['size']
-            this.seed = oak_data['seed']
             this.state = oak_data['seed']
             this.current_worker = model
             this.worker = new Worker(new URL('./OakWorker.ts', import.meta.url), { type: 'module' })
@@ -88,6 +88,10 @@ class NCA
         return this.size
     }
 
+    public get_worker_steps() {
+        return this.worker_steps
+    }
+
     public start_model() {
         // * assert worker is ready
         if (!this.worker_ready) {
@@ -118,6 +122,7 @@ class NCA
                 const new_state = event.data.data
                 this.state = new_state
                 this.convert_to_rgba()
+                this.worker_steps += 1
             }
             else if (event.data.type === 'error') {
                 this.terminate()

@@ -5,6 +5,7 @@ import { delay, random_uint8_volume } from './Util'
 import { Camera, Vec2, Vec3, Vec4 } from './lib/rary'
 import { RenderCube } from './RenderCube'
 import { RenderShadow } from './RenderShadow'
+import { RenderCapture } from './RenderCapture'
 import { NCA } from './NCA'
 
 // [TODO]
@@ -24,6 +25,7 @@ class Sim {
     bg: Vec4
     light_pos: Vec3
     light_radius: number
+    light_color_mult: Vec4
     static zoom: number = 1.8
 
     // render components
@@ -32,11 +34,14 @@ class Sim {
     resize: CanvasResize | null = null
     ui: UI | null = null
     camera: Camera | null = null
-    rendercube: RenderCube | null = null
-    rendershadow: RenderShadow | null = null
     texture3d: WebGLTexture | null = null
     nca: NCA
 
+    // render layers
+    rendershadow: RenderShadow | null = null
+    rendercapture: RenderCapture | null = null
+    rendercube: RenderCube | null = null
+    
     // user input
     is_input: boolean = false
     mouse_button: number = 0
@@ -48,13 +53,9 @@ class Sim {
     max_zoom: number = 8.0
     prev_d: Vec2 = Vec2.zero
 
-    // delete later
-    start_model: boolean = false
-
     // auto restart feature
     auto_restart: boolean = true
-    auto_restart_steps: number = 1000
-    auto_restart_count: number = 0
+    auto_restart_steps: number = 250
 
     // key input dictionary
     key_down: Record<string, boolean>
@@ -71,8 +72,9 @@ class Sim {
         this.key_down = {}
         this.paused = false
         this.bg = new Vec4([0.0, 0.0, 0.0, 1.0])
+        this.light_color_mult = new Vec4([0.2, 0.2, 0.3, 1.0])
         this.light_pos = new Vec3([2, 2, -2])
-        this.light_radius = 16.0
+        this.light_radius = 8.0
 
         // * setup NCA
         this.nca = new NCA()
@@ -84,8 +86,10 @@ class Sim {
         this.canvas = _canvas
         this.context = webgl_util.request_context(this.canvas)
         this.resize = new CanvasResize(this.canvas)
-        this.rendercube = new RenderCube(this.context)
         this.rendershadow = new RenderShadow(this.context)
+        this.rendercapture = new RenderCapture(this.context)
+        this.rendercube = new RenderCube(this.context)
+        
         this.reboot_camera()
         console.log('simulation initialized...')
     }
@@ -187,9 +191,7 @@ class Sim {
         // * auto restart calculation
         let reset = false
         if (this.auto_restart) {
-            this.auto_restart_count += 1
-            if (this.auto_restart_steps == this.auto_restart_count) {
-                this.auto_restart_count = 0
+            if (this.auto_restart_steps == this.nca.get_worker_steps()) {
                 reset = true
             }
         }
@@ -218,11 +220,16 @@ class Sim {
         let w = this.canvas?.width as number
         let h = this.canvas?.height as number
         if (this.texture3d) {
-            this.rendershadow?.render(w, h, camera, this.bg, this.light_pos, this.light_radius, this.texture3d)
-            this.rendercube?.render(w, h, camera, this.bg,this.light_pos, this.texture3d)
+            this.rendershadow?.render(w, h, camera, this.bg, this.light_pos, this.light_radius, this.light_color_mult, this.texture3d)
+            this.rendercapture?.render(w, h)
+            const capture_texture = this.rendercapture?.getTexture()
+            if (capture_texture)
+                this.rendercube?.render(w, h, camera, this.light_pos, this.texture3d, capture_texture)
+            else 
+                this.rendercube?.render(w, h, camera, this.light_pos, this.texture3d)
         } else {
-            this.rendershadow?.render(w, h, camera, this.bg, this.light_pos, this.light_radius)
-            this.rendercube?.render(w, h, camera, this.bg, this.light_pos)
+            this.rendershadow?.render(w, h, camera, this.bg, this.light_pos, this.light_radius, this.light_color_mult)
+            this.rendercube?.render(w, h, camera, this.light_pos)
         }
     }
 
