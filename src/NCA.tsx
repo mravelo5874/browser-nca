@@ -1,11 +1,12 @@
 import * as ort from 'onnxruntime-web'
-import { cowboy16, earth, oak, oak_seed } from './data/all'
+import { oak_seed, rubiks_seed, sphere_seed } from './data/all'
 
 export { NCA, NCAmodels }
 
 const NCAmodels: string[] = [
     'oak',
-    'earth'
+    'rubiks',
+    'sphere'
 ]
 
 const oak_data = {
@@ -14,11 +15,24 @@ const oak_data = {
     'seed': new Float32Array(oak_seed)
 }
 
+const sphere_data = {
+    'model': 'sphere16_iso3_thesis',
+    'size': 24,
+    'seed': new Float32Array(sphere_seed)
+}
+
+const rubiks_data = {
+    'model': 'rubiks_iso3',
+    'size': 23,
+    'seed': new Float32Array(rubiks_seed)
+}
+
 class NCA
 {
     private transpose: ort.InferenceSession | null = null
     private state: Float32Array | null = null
     private size: number | null = null
+    private model: string | null = null
 
     private worker: Worker | null = null
     private current_worker: string | null = null
@@ -42,21 +56,35 @@ class NCA
         this.terminate()
         this.worker_steps = 0
         // * init model worker
-        switch(model) {
+        switch (model) {
         case 'oak':
+            this.model = oak_data['model']
             this.size = oak_data['size']
             this.state = oak_data['seed']
-            this.current_worker = model
-            this.worker = new Worker(new URL('./OakWorker.ts', import.meta.url), { type: 'module' })
-            this.worker.postMessage({ type: 'init' })
-            this.worker.onmessage = (event) => {
-                if (event.data.type === 'init-complete') {
-                    this.worker_ready = true
-                    console.log('[NCA -- load_model] worker is ready!')
-                }
-            }
+            break
+        case 'sphere':
+            this.model = sphere_data['model']
+            this.size = sphere_data['size']
+            this.state = sphere_data['seed']
+            break
+        case 'rubiks':
+            this.model = rubiks_data['model']
+            this.size = rubiks_data['size']
+            this.state = rubiks_data['seed']
             break
         }
+        this.convert_to_rgba()
+    
+        this.current_worker = model
+        this.worker = new Worker(new URL('./NCAWorker.ts', import.meta.url), { type: 'module' })
+        this.worker.postMessage({ type: 'init', data: [this.model] })
+        this.worker.onmessage = (event) => {
+            if (event.data.type === 'init-complete') {
+                this.worker_ready = true
+                console.log('[NCA -- load_model] worker is ready!')
+            }
+        }
+  
     }
 
     public update() {
@@ -76,7 +104,7 @@ class NCA
     }
     
     async init_transpose_model() {
-        try { this.transpose = await ort.InferenceSession.create('./models/transpose_model.onnx') }
+        try { this.transpose = await ort.InferenceSession.create('./models/transpose_model_v1.onnx') }
         catch (e) { console.log('error! unable to create transpose session: ' + e) }
     }
 
@@ -94,16 +122,11 @@ class NCA
 
     public start_model() {
         // * assert worker is ready
-        if (!this.worker_ready) {
-            //console.log('[NCA -- start_model] worker is not ready -- returning')
-            return
-        } 
+        if (!this.worker_ready) return
+        
         // * assert worker is not already running
-        if (this.worker_running) {
-            //console.log('[NCA -- start_model] worker is already running -- returning')
-            return
-        } 
-
+        if (this.worker_running) return
+        
         // * begin worker loop
         this.worker_running = true
         this.worker_loop()

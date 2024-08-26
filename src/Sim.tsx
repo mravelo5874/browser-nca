@@ -99,6 +99,10 @@ class Sim {
         console.log('simulation started...')
     }
 
+    public load_model(model: string) {
+        this.nca.load_model_worker(model)
+    }
+
     public get_key(key: string): boolean {
         if (!this.key_down[key]) return false
         else return this.key_down[key]

@@ -106,3 +106,17 @@ h1, h2, h3, h4 {
   box-shadow: black -0.05em -0.05em 0.1em;
   color: white;
 }
+
+.dropdown_input {
+  width: 100%;
+  font-family: monospace;
+  font-size: 16px;
+  padding: 0.5em;
+  border: none;
+  /* border */
+  border: solid 0.1em rgba(0, 0, 0, 0.3);
+}
+
+.dropdown_option {
+  padding: 0.5em;
+}

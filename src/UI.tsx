@@ -26,6 +26,7 @@ class UI extends React.Component<UIInterface, {}> {
 
         // bind 'this' for class functions
         this.toggle_sidebar = this.toggle_sidebar.bind(this);
+        this.load_model = this.load_model.bind(this);
 
         console.log('ui constructed...')
     }
@@ -70,6 +71,13 @@ class UI extends React.Component<UIInterface, {}> {
         }
     }
 
+    load_model() {
+        let menu = document.getElementById('load_model_dropdown') as HTMLSelectElement
+        const value = menu.value
+        let sim = this.props.sim
+        sim.load_model(value)
+    }
+
     render() {
         return(
             <>
@@ -77,7 +85,21 @@ class UI extends React.Component<UIInterface, {}> {
                     <div id='sidebar_panel'>
                         <h4 style={{fontSize:'1em'}}>res: <span id='res'/></h4>
                         <h4 style={{fontSize:'1em'}}>fps: <span id='fps'/></h4>
+
+                        <hr/>
+
+                        <div style={{paddingBottom:'0.5em', paddingRight:'0.5em'}}>
+                            <h4 style={{paddingBottom:'0.5em'}}>model:</h4>
+                            <select className='dropdown_input' name='load_model_dropdown' id='load_model_dropdown' onChange={this.load_model}>
+                                <option className='dropdown_option' value='oak'>oak</option>
+                                <option value='rubiks'>rubiks</option>
+                                <option value='sphere'>sphere</option>
+                            </select>
+                        </div>
                     </div>
+
+                    
+
                     <button id='sidebar_button' className='ui_button' onClick={this.toggle_sidebar}>close</button>
                 </div> 
 
