@@ -12,7 +12,7 @@ class NCAWorker
 		try {
 			const path = `${pwd}/models/${model_name}.onnx`
 			this.session = await ort.InferenceSession.create(path)
-			console.log('[NCAWorker -- init] ONNX model loaded successfully')
+			// console.log('[NCAWorker -- init] ONNX model loaded successfully')
 			return true
 		} 
 		catch (error) {

@@ -5,15 +5,12 @@ import { delay, random_uint8_volume } from './Util'
 import { Camera, Vec2, Vec3, Vec4 } from './lib/rary'
 import { RenderCube } from './RenderCube'
 import { RenderShadow } from './RenderShadow'
-import { RenderCapture } from './RenderCapture'
+import { PostProcessing } from './PostProcessing'
 import { NCA } from './NCA'
 
 // [TODO]
 //      - postprocess antialiasing using WebGLRenderTargets (https://discourse.threejs.org/t/how-to-get-canvas-as-a-texture-to-chain-together-shaders/16056)
-//      - load in nca models and run asynchronously
-//      - read in data from running models for rendering
 //      - fix lighting engine (large alpha values through volume into plane are too dark)
-//      - reset NCA model every X steps (by default)
 //      - add ability to add delay to model steps (to view model grow slower or in real-time)
 
 export { Sim }
@@ -39,8 +36,8 @@ class Sim {
 
     // render layers
     rendershadow: RenderShadow | null = null
-    rendercapture: RenderCapture | null = null
     rendercube: RenderCube | null = null
+    postprocess: PostProcessing | null = null
     
     // user input
     is_input: boolean = false
@@ -78,7 +75,7 @@ class Sim {
 
         // * setup NCA
         this.nca = new NCA()
-        this.nca.load_model_worker('oak')
+        this.nca.load_model_worker('sphere')
         console.log('simulation constructed...')
     }
     
@@ -87,8 +84,8 @@ class Sim {
         this.context = webgl_util.request_context(this.canvas)
         this.resize = new CanvasResize(this.canvas)
         this.rendershadow = new RenderShadow(this.context)
-        this.rendercapture = new RenderCapture(this.context)
         this.rendercube = new RenderCube(this.context)
+        this.postprocess = new PostProcessing(this.context)
         
         this.reboot_camera()
         console.log('simulation initialized...')
@@ -223,14 +220,14 @@ class Sim {
         let camera = this.camera as Camera
         let w = this.canvas?.width as number
         let h = this.canvas?.height as number
+
+        // nca data available
         if (this.texture3d) {
             this.rendershadow?.render(w, h, camera, this.bg, this.light_pos, this.light_radius, this.light_color_mult, this.texture3d)
-            this.rendercapture?.render(w, h)
-            const capture_texture = this.rendercapture?.getTexture()
-            if (capture_texture)
-                this.rendercube?.render(w, h, camera, this.light_pos, this.texture3d, capture_texture)
-            else 
-                this.rendercube?.render(w, h, camera, this.light_pos, this.texture3d)
+            this.rendercube?.render(w, h, camera, this.light_pos, this.texture3d)
+            this.postprocess?.render(w, h, this.canvas!)
+
+        // * no nca data
         } else {
             this.rendershadow?.render(w, h, camera, this.bg, this.light_pos, this.light_radius, this.light_color_mult)
             this.rendercube?.render(w, h, camera, this.light_pos)

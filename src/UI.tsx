@@ -89,16 +89,17 @@ class UI extends React.Component<UIInterface, {}> {
                         <hr/>
 
                         <div style={{paddingBottom:'0.5em', paddingRight:'0.5em'}}>
-                            <h4 style={{paddingBottom:'0.5em'}}>model:</h4>
+                            <h4 style={{paddingBottom:'0.5em'}}>select model:</h4>
                             <select className='dropdown_input' name='load_model_dropdown' id='load_model_dropdown' onChange={this.load_model}>
-                                <option className='dropdown_option' value='oak'>oak</option>
-                                <option value='rubiks'>rubiks</option>
-                                <option value='sphere'>sphere</option>
+                                <option className='dropdown_option' value='oak'>🌳 oak</option>
+                                <option value='rubiks'>🧊 rubiks</option>
+                                <option value='sphere'>🔵 sphere</option>
+                                <option value='burger'>🍔 burger</option>
+                                <option value='cowboy'>🤠 cowboy</option>
+                                <option value='earth'>🌍 earth</option>
                             </select>
                         </div>
                     </div>
-
-                    
 
                     <button id='sidebar_button' className='ui_button' onClick={this.toggle_sidebar}>close</button>
                 </div> 

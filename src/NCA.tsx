@@ -1,30 +1,51 @@
 import * as ort from 'onnxruntime-web'
-import { oak_seed, rubiks_seed, sphere_seed } from './data/all'
+import * as vox_data from './data/all'
 
 export { NCA, NCAmodels }
 
 const NCAmodels: string[] = [
     'oak',
     'rubiks',
-    'sphere'
+    'sphere',
+    'burger',
+    'cowboy',
+    'earth'
 ]
 
 const oak_data = {
-    'model': 'oak_aniso',
+    'model': 'oak_aniso_single',
     'size': 32,
-    'seed': new Float32Array(oak_seed)
+    'seed': new Float32Array(vox_data.oak_seed)
 }
 
 const sphere_data = {
     'model': 'sphere16_iso3_thesis',
     'size': 24,
-    'seed': new Float32Array(sphere_seed)
+    'seed': new Float32Array(vox_data.sphere_seed)
 }
 
 const rubiks_data = {
-    'model': 'rubiks_iso3',
-    'size': 23,
-    'seed': new Float32Array(rubiks_seed)
+    'model': 'rubiks_black_cube_iso3_v3',
+    'size': 25,
+    'seed': new Float32Array(vox_data.rubiks_seed)
+}
+
+const burger_data = {
+    'model': 'burger_aniso',
+    'size': 24,
+    'seed': new Float32Array(vox_data.burger_seed)
+}
+
+const cowboy_data = {
+    'model': 'cowboy16_iso2_v13',
+    'size': 24,
+    'seed': new Float32Array(vox_data.cowboy_seed)
+}
+
+const earth_data = {
+    'model': 'earth_aniso_single',
+    'size': 32,
+    'seed': new Float32Array(vox_data.earth_seed)
 }
 
 class NCA
@@ -72,6 +93,21 @@ class NCA
             this.size = rubiks_data['size']
             this.state = rubiks_data['seed']
             break
+        case 'burger':
+            this.model = burger_data['model']
+            this.size = burger_data['size']
+            this.state = burger_data['seed']
+            break
+        case 'cowboy':
+            this.model = cowboy_data['model']
+            this.size = cowboy_data['size']
+            this.state = cowboy_data['seed']
+            break
+        case 'earth':
+            this.model = earth_data['model']
+            this.size = earth_data['size']
+            this.state = earth_data['seed']
+            break
         }
         this.convert_to_rgba()
     
@@ -81,7 +117,7 @@ class NCA
         this.worker.onmessage = (event) => {
             if (event.data.type === 'init-complete') {
                 this.worker_ready = true
-                console.log('[NCA -- load_model] worker is ready!')
+                // console.log('[NCA -- load_model] worker is ready!')
             }
         }
   

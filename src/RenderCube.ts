@@ -54,7 +54,7 @@ class RenderCube {
         gl.useProgram(this.program)
     }
 
-    render(w: number, h: number, camera: Camera, light: Vec3, texture3d?: WebGLTexture, capture?: WebGLTexture) {
+    render(w: number, h: number, camera: Camera, light: Vec3, texture3d?: WebGLTexture) {
         let gl = this.gl
         gl.bindFramebuffer(gl.FRAMEBUFFER, null)
         gl.enable(gl.CULL_FACE)
@@ -65,14 +65,14 @@ class RenderCube {
         gl.viewport(0, 0, w, h)
 
         // setup render cube
-        this.setup_cube_render(gl, camera, light, texture3d, capture)
+        this.setup_cube_render(gl, camera, light, texture3d)
 
         // draw
         gl.bindFramebuffer(gl.FRAMEBUFFER, null)
         gl.drawElements(gl.TRIANGLES, this.cube.get_idx_u32().length, gl.UNSIGNED_INT, 0)
     }
 
-    setup_cube_render(gl: WebGL2RenderingContext, camera: Camera, light: Vec3, texture3d?: WebGLTexture, capture?: WebGLTexture) {
+    setup_cube_render(gl: WebGL2RenderingContext, camera: Camera, light: Vec3, texture3d?: WebGLTexture) {
         let program = this.program as WebGLProgram
         
         // draw cube
@@ -148,19 +148,6 @@ class RenderCube {
             }
             gl.uniform1i(volume_loc, 0)
         }
-
-        // set capture uniform
-        if (capture) {
-            const background_loc = gl.getUniformLocation(program, 'u_background')
-            gl.activeTexture(gl.TEXTURE1)
-            gl.bindTexture(gl.TEXTURE_2D, capture)
-            gl.generateMipmap(gl.TEXTURE_2D)
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR)
-            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR)
-            gl.uniform1i(background_loc, 1)
-        }
     }
 }
 
@@ -197,7 +184,6 @@ precision highp float;
 
 uniform vec3 u_light;
 uniform highp sampler3D u_volume;
-uniform highp sampler2D u_background;
 
 in vec4 v_norm;
 in vec2 v_uv;
@@ -274,8 +260,6 @@ void main() {
     }
 
     // add bg color
-    vec4 bg_color = texture(u_background, v_uv);
-    //my_color.rgba = vec4(bg_color.rgb * (1.0 - my_color.a) + (my_color.rgb * my_color.a), 1.0);
     fragColor = my_color;
 }
 `
