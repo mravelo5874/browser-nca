@@ -25,8 +25,9 @@ class UI extends React.Component<UIInterface, {}> {
         this.props.sim.ui = this
 
         // bind 'this' for class functions
-        this.toggle_sidebar = this.toggle_sidebar.bind(this);
-        this.load_model = this.load_model.bind(this);
+        this.toggle_sidebar = this.toggle_sidebar.bind(this)
+        this.load_model = this.load_model.bind(this)
+        this.toggle_pp = this.toggle_pp.bind(this)
 
         console.log('ui constructed...')
     }
@@ -78,6 +79,11 @@ class UI extends React.Component<UIInterface, {}> {
         sim.load_model(value)
     }
 
+    toggle_pp() {
+        let sim = this.props.sim
+        sim.toggle_pp()
+    }
+
     render() {
         return(
             <>
@@ -91,13 +97,18 @@ class UI extends React.Component<UIInterface, {}> {
                         <div style={{paddingBottom:'0.5em', paddingRight:'0.5em'}}>
                             <h4 style={{paddingBottom:'0.5em'}}>select model:</h4>
                             <select className='dropdown_input' name='load_model_dropdown' id='load_model_dropdown' onChange={this.load_model}>
-                                <option className='dropdown_option' value='oak'>🌳 oak</option>
+                                <option className='dropdown_option' value='sphere'>🔵 sphere</option>
+                                <option value='oak'>🌳 oak</option>
                                 <option value='rubiks'>🧊 rubiks</option>
-                                <option value='sphere'>🔵 sphere</option>
                                 <option value='burger'>🍔 burger</option>
                                 <option value='cowboy'>🤠 cowboy</option>
                                 <option value='earth'>🌍 earth</option>
                             </select>
+                        </div>
+
+                        <div className='ui_row'>
+                            <input type='checkbox' id='toggle_pp' className='ui_button' onClick={this.toggle_pp} defaultChecked/>
+                            <h4 className='ctrl_module_sub_title'>post processing</h4>
                         </div>
                     </div>
 

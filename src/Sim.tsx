@@ -38,6 +38,7 @@ class Sim {
     rendershadow: RenderShadow | null = null
     rendercube: RenderCube | null = null
     postprocess: PostProcessing | null = null
+    use_postprocess: boolean = true
     
     // user input
     is_input: boolean = false
@@ -94,6 +95,10 @@ class Sim {
     start() {
         window.requestAnimationFrame(() => this.render_loop())
         console.log('simulation started...')
+    }
+
+    public toggle_pp() {
+        this.use_postprocess = !this.use_postprocess
     }
 
     public load_model(model: string) {
@@ -224,13 +229,14 @@ class Sim {
         // nca data available
         if (this.texture3d) {
             this.rendershadow?.render(w, h, camera, this.bg, this.light_pos, this.light_radius, this.light_color_mult, this.texture3d)
+            if (this.use_postprocess) this.postprocess?.render(w, h, 2.0, this.canvas!)
             this.rendercube?.render(w, h, camera, this.light_pos, this.texture3d)
-            this.postprocess?.render(w, h, this.canvas!)
+            if (this.use_postprocess) this.postprocess?.render(w, h, 0.2, this.canvas!)
 
         // * no nca data
         } else {
             this.rendershadow?.render(w, h, camera, this.bg, this.light_pos, this.light_radius, this.light_color_mult)
-            this.rendercube?.render(w, h, camera, this.light_pos)
+            if (this.use_postprocess) this.postprocess?.render(w, h, 2.0, this.canvas!)
         }
     }
 

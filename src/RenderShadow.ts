@@ -140,6 +140,10 @@ class RenderShadow
         const light_mult_loc = gl.getUniformLocation(program, "u_light_color_mult")
         gl.uniform4fv(light_mult_loc, new Float32Array(light_color_mult.xyzw))
 
+        // set use volume boolean
+        const usevolloc = gl.getUniformLocation(program, "u_use_vol")
+        gl.uniform1i(usevolloc, texture3d == null ? 0 : 1)
+
         // set volume uniform
         if (texture3d) {
             const volume_loc = gl.getUniformLocation(program, 'u_volume')
@@ -183,10 +187,11 @@ precision highp float;
 
 uniform float u_plane_f;
 uniform float u_plane_s;
-uniform vec3 u_light;
 uniform float u_light_rad;
-uniform highp sampler3D u_volume;
+uniform vec3 u_light;
 uniform vec4 u_light_color_mult;
+uniform highp sampler3D u_volume;
+uniform int u_use_vol;
 
 in vec4 v_norm;
 in vec2 v_uv;
@@ -239,6 +244,11 @@ void main() {
                 break;
             }
             p += dir * dt;
+        }
+
+        // no shadow if volume not used
+        if (u_use_vol == 0) {
+            my_color = vec4(0.0);
         }
 
         // shadow if no voxels hit
