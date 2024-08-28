@@ -33,6 +33,7 @@ class Sim {
     camera: Camera | null = null
     texture3d: WebGLTexture | null = null
     nca: NCA
+    step: number = 0
 
     // render layers
     rendershadow: RenderShadow | null = null
@@ -197,7 +198,7 @@ class Sim {
         // * auto restart calculation
         let reset = false
         if (this.auto_restart) {
-            if (this.auto_restart_steps == this.nca.get_worker_steps()) {
+            if (this.auto_restart_steps <= this.nca.get_worker_steps()) {
                 reset = true
             }
         }
@@ -205,9 +206,11 @@ class Sim {
         // * reset model ELSE update model
         if (this.get_key('KeyR') || reset) {
             this.nca.reset()
+            this.step = 0
         }
         else {
             this.nca.update()
+            this.step = this.nca.get_worker_steps()
         }
 
         // get rbga data from NCA worker

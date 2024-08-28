@@ -9,24 +9,32 @@ interface UIInterface {
 
 class UI extends React.Component<UIInterface, {}> {
 
-    sidebar_open: boolean;
+    sidebar_left_open: boolean
+    sidebar_right_open: boolean
 
     // text nodes
-    fps_node: Text | null = null;
-    res_node: Text | null = null;
+    fps_node: Text | null = null
+    res_node: Text | null = null
+    step_node: Text | null = null
 
     constructor(props: UIInterface) {
         super(props)
         
         // start with sidebar open
-        this.sidebar_open = true
+        this.sidebar_left_open = true
+        this.sidebar_right_open = false
         
         // set simulation ui
         this.props.sim.ui = this
 
         // bind 'this' for class functions
-        this.toggle_sidebar = this.toggle_sidebar.bind(this)
+        this.toggle_sidebar_left = this.toggle_sidebar_left.bind(this)
+        this.toggle_sidebar_right = this.toggle_sidebar_right.bind(this)
         this.load_model = this.load_model.bind(this)
+        this.change_plane_color = this.change_plane_color.bind(this)
+
+        // set right-sidebar to be closed by default
+
 
         console.log('ui constructed...')
     }
@@ -51,19 +59,47 @@ class UI extends React.Component<UIInterface, {}> {
             fps_element?.appendChild(this.fps_node)
             this.fps_node.nodeValue = ''
         }
-        // update text
-        if (this.fps_node) this.fps_node.nodeValue = this.props.sim.fps.toFixed(0)
+        else {
+            this.fps_node.nodeValue = this.props.sim.fps.toFixed(0)
+        }
+
+        // find step text node
+        if (!this.step_node) {
+            let step_element = document.querySelector("#step")
+            this.step_node = document.createTextNode('')
+            step_element?.appendChild(this.step_node)
+            this.step_node.nodeValue = ''
+        }
+        else {
+            this.step_node.nodeValue = this.props.sim.step.toFixed(0)
+        }
     }
 
-    toggle_sidebar() {
-        this.sidebar_open = !this.sidebar_open
-        var sidebar = document.getElementById('sidebar') as HTMLDivElement
+    toggle_sidebar_left() {
+        this.sidebar_left_open = !this.sidebar_left_open
+        var sidebar = document.getElementById('sidebar-left') as HTMLDivElement
         sidebar.classList.toggle('closed')
-        var panel = document.getElementById('sidebar_panel') as HTMLDivElement
+        var panel = document.getElementById('sidebar-left-panel') as HTMLDivElement
         panel.classList.toggle('closed')
-        var button = document.getElementById('sidebar_button') as HTMLButtonElement
+        var button = document.getElementById('sidebar-left-button') as HTMLButtonElement
         button.classList.toggle('closed')
-        if (this.sidebar_open) {
+        if (this.sidebar_left_open) {
+            button.innerHTML = 'close'
+        }
+        else {
+            button.innerHTML = 'open'
+        }
+    }
+
+    toggle_sidebar_right() {
+        this.sidebar_right_open = !this.sidebar_right_open
+        var sidebar = document.getElementById('sidebar-right') as HTMLDivElement
+        sidebar.classList.toggle('closed')
+        var panel = document.getElementById('sidebar-right-panel') as HTMLDivElement
+        panel.classList.toggle('closed')
+        var button = document.getElementById('sidebar-right-button') as HTMLButtonElement
+        button.classList.toggle('closed')
+        if (this.sidebar_right_open) {
             button.innerHTML = 'close'
         }
         else {
@@ -78,13 +114,22 @@ class UI extends React.Component<UIInterface, {}> {
         sim.load_model(value)
     }
 
+    change_plane_color() {
+
+    }
+
     render() {
         return(
             <>
-                <div id='sidebar'>
-                    <div id='sidebar_panel'>
+                <div id='sidebar-left'>
+                    <div id='sidebar-left-panel'>
+                        <h4 style={{fontSize:'1em'}}>This is the left sidebar.</h4>
+
+                        <hr/>
+
                         <h4 style={{fontSize:'1em'}}>res: <span id='res'/></h4>
                         <h4 style={{fontSize:'1em'}}>fps: <span id='fps'/></h4>
+                        <h4 style={{fontSize:'1em'}}>step: <span id='step'/></h4>
 
                         <hr/>
 
@@ -99,12 +144,23 @@ class UI extends React.Component<UIInterface, {}> {
                                 <option value='earth'>🌍 earth</option>
                             </select>
                         </div>
+
+                        <hr/>
+
+                        <input type="color" id="head" name="head" value="#e66465" onChange={this.change_plane_color}/>
                     </div>
 
-                    <button id='sidebar_button' className='ui_button' onClick={this.toggle_sidebar}>close</button>
+                    <button id='sidebar-left-button' className='ui_button' onClick={this.toggle_sidebar_left}>close</button>
                 </div> 
 
-                
+                <div id='sidebar-right' className='closed'>
+                    <div id='sidebar-right-panel' className='closed'>
+                        <h4 style={{fontSize:'1em'}}>This is the right sidebar.</h4>
+
+                        <hr/>
+                    </div>
+                    <button id='sidebar-right-button' className={'ui_button closed'} onClick={this.toggle_sidebar_right}>open</button>
+                </div> 
             </>
         )
     }

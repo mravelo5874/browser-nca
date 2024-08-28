@@ -19,7 +19,11 @@ h1, h2, h3, h4 {
   margin: 0px;
 }
 
-#sidebar {
+/*
+LEFT SIDEBAR
+*/
+
+#sidebar-left {
   width: 24em;
   transition: 0.5s ease-in-out;
 
@@ -30,11 +34,11 @@ h1, h2, h3, h4 {
   left:0px;
 }
 
-#sidebar.closed {
+#sidebar-left.closed {
   left: -16.5em;
 }
 
-#sidebar_panel {
+#sidebar-left-panel {
   transition: 0.5s ease-in-out;
 
   width: 16em;
@@ -57,12 +61,12 @@ h1, h2, h3, h4 {
   box-shadow: black 0.5em 0.0em 0.5em;
 }
 
-#sidebar_panel.closed {
+#sidebar-left-panel.closed {
   box-shadow: black 0.0em 0.0em 0.0em;
   background-color:black;
 }
 
-#sidebar_button {
+#sidebar-left-button {
   transition: 0.5s ease-in-out;
 
   /* position */
@@ -75,12 +79,83 @@ h1, h2, h3, h4 {
   box-shadow: black 0.1em 0.1em 0.1em;
 }
 
-#sidebar_button.closed {
+#sidebar-left-button.closed {
   background-color: black;
   color:white;
   border: solid 0.1em white;
   box-shadow: white 0.1em 0.1em 0.1em;
 }
+
+/*
+RIGHT SIDEBAR
+*/
+
+#sidebar-right {
+  width: 24em;
+  transition: 0.5s ease-in-out;
+
+  /* position */
+  position: absolute;
+  top:0px;
+  bottom:0px;
+  right:0px;
+}
+
+#sidebar-right.closed {
+  right: -16.5em;
+}
+
+#sidebar-right-panel {
+  transition: 0.5s ease-in-out;
+
+  width: 16em;
+  height: 100%;
+  overflow-y: auto;
+
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+  padding-left: 0.5em;
+  padding-left: 0.5em;
+
+  /* position */
+  position: absolute;
+  top:0px;
+  bottom:0px;
+  right:0px;
+  direction: ltr;
+
+  background-color:rgba(255, 255, 255, 0.8);
+  box-shadow: black 0.5em 0.0em 0.5em;
+}
+
+#sidebar-right-panel.closed {
+  box-shadow: black 0.0em 0.0em 0.0em;
+  background-color:black;
+}
+
+#sidebar-right-button {
+  transition: 0.5s ease-in-out;
+
+  /* position */
+  position: absolute;
+  top:0px;
+  right:16.5em;
+
+  background-color:white;
+  color:black;
+  box-shadow: black 0.1em 0.1em 0.1em;
+}
+
+#sidebar-right-button.closed {
+  background-color: black;
+  color:white;
+  border: solid 0.1em white;
+  box-shadow: white 0.1em 0.1em 0.1em;
+}
+
+/*
+GUI BUILDING BLOCKS
+*/
 
 .ui_button {
   /* text */

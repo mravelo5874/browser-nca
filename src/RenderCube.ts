@@ -221,7 +221,7 @@ void main() {
     t_hit.x = max(t_hit.x, 0.0);
 
     // step 3: set step size to march through volume
-    float dt = 0.0005;
+    float dt = 0.001;
 
     float light_dist = length(u_light) - 0.5;
 

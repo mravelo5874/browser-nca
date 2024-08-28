@@ -24,7 +24,7 @@ uniform float u_blur_strength;
 
 const float EDGE_THRESHOLD_MIN = 0.0312;
 const float EDGE_THRESHOLD_MAX = 0.125; // Lowered for more aggressive detection
-const int ITERATIONS = 4; // Increased for more refinement
+const int ITERATIONS = 2; // Increased for more refinement
 const float SUBPIXEL_QUALITY = 0.75;
 
 float rgb2luma(vec3 rgb) {
