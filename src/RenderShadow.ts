@@ -254,7 +254,7 @@ void main() {
         // shadow if no voxels hit
         if (my_color != vec4(0.0)) {
             float ldist = distance(ori, u_light);
-            float shadow_intensity = 0.2;
+            float shadow_intensity = 0.1;
             float light = 1.0 - (ldist / u_light_rad) - shadow_intensity;
             my_color = vec4(light, light, light, 1.0) * u_light_color_mult;
         }
@@ -265,7 +265,10 @@ void main() {
         float light = 1.0 - (ldist / u_light_rad);
         my_color = vec4(light, light, light, 1.0) * u_light_color_mult;
     }
-
-    fragColor = my_color;
+        
+    // Apply dithering to reduce banding
+    float dither_strength = 0.014; // Adjust this value for stronger dithering
+    float dither = (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) * dither_strength;
+    fragColor = my_color + vec4(dither, dither, dither, 0.0);
 }
 `

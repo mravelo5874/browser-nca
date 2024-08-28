@@ -27,7 +27,6 @@ class UI extends React.Component<UIInterface, {}> {
         // bind 'this' for class functions
         this.toggle_sidebar = this.toggle_sidebar.bind(this)
         this.load_model = this.load_model.bind(this)
-        this.toggle_pp = this.toggle_pp.bind(this)
 
         console.log('ui constructed...')
     }
@@ -79,11 +78,6 @@ class UI extends React.Component<UIInterface, {}> {
         sim.load_model(value)
     }
 
-    toggle_pp() {
-        let sim = this.props.sim
-        sim.toggle_pp()
-    }
-
     render() {
         return(
             <>
@@ -104,11 +98,6 @@ class UI extends React.Component<UIInterface, {}> {
                                 <option value='cowboy'>🤠 cowboy</option>
                                 <option value='earth'>🌍 earth</option>
                             </select>
-                        </div>
-
-                        <div className='ui_row'>
-                            <input type='checkbox' id='toggle_pp' className='ui_button' onClick={this.toggle_pp} defaultChecked/>
-                            <h4 className='ctrl_module_sub_title'>post processing</h4>
                         </div>
                     </div>
 

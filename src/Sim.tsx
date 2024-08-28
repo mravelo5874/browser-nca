@@ -70,7 +70,7 @@ class Sim {
         this.key_down = {}
         this.paused = false
         this.bg = new Vec4([0.0, 0.0, 0.0, 1.0])
-        this.light_color_mult = new Vec4([0.2, 0.2, 0.3, 1.0])
+        this.light_color_mult = new Vec4([0.1, 0.2, 0.3, 1.0])
         this.light_pos = new Vec3([2, 2, -2])
         this.light_radius = 8.0
 
@@ -229,14 +229,12 @@ class Sim {
         // nca data available
         if (this.texture3d) {
             this.rendershadow?.render(w, h, camera, this.bg, this.light_pos, this.light_radius, this.light_color_mult, this.texture3d)
-            if (this.use_postprocess) this.postprocess?.render(w, h, 2.0, this.canvas!)
+            if (this.use_postprocess) this.postprocess?.render(w, h, 4.0, this.canvas!)
             this.rendercube?.render(w, h, camera, this.light_pos, this.texture3d)
-            if (this.use_postprocess) this.postprocess?.render(w, h, 0.2, this.canvas!)
 
         // * no nca data
         } else {
             this.rendershadow?.render(w, h, camera, this.bg, this.light_pos, this.light_radius, this.light_color_mult)
-            if (this.use_postprocess) this.postprocess?.render(w, h, 2.0, this.canvas!)
         }
     }
 

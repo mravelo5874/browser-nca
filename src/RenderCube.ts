@@ -259,7 +259,9 @@ void main() {
         discard;
     }
 
-    // add bg color
-    fragColor = my_color;
+    // Apply dithering to reduce banding
+    float dither_strength = 0.01; // Adjust this value for stronger dithering
+    float dither = (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) * dither_strength;
+    fragColor = my_color + vec4(dither, dither, dither, 0.0);
 }
 `
