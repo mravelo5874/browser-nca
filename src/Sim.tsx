@@ -20,6 +20,7 @@ class Sim {
     // simulation components
     paused: boolean
     bg: Vec4
+    light_speed: number = 1.0
     light_pos: Vec3
     light_radius: number
     light_color_mult: Vec4
@@ -72,12 +73,12 @@ class Sim {
         this.paused = false
         this.bg = new Vec4([0.0, 0.0, 0.0, 1.0])
         this.light_color_mult = new Vec4([0.1, 0.2, 0.3, 1.0])
-        this.light_pos = new Vec3([2, 2, -2])
+        this.light_pos = new Vec3([2, 2, 2])
         this.light_radius = 8.0
 
         // * setup NCA
         this.nca = new NCA()
-        this.nca.load_model_worker('sphere')
+        this.nca.load_model_worker('oak')
         console.log('simulation constructed...')
     }
     
@@ -98,8 +99,8 @@ class Sim {
         console.log('simulation started...')
     }
 
-    public toggle_pp() {
-        this.use_postprocess = !this.use_postprocess
+    public toggle_auto_reset() {
+        this.auto_restart = !this.auto_restart
     }
 
     public load_model(model: string) {
@@ -109,6 +110,54 @@ class Sim {
     public get_key(key: string): boolean {
         if (!this.key_down[key]) return false
         else return this.key_down[key]
+    }
+
+    public set_light_speed(val: number) {
+        this.light_speed = val
+    }
+
+    public set_ground_color(color: string) {
+        // Remove the hash if it's there
+        let hex = color.replace(/^#/, '')
+
+        // Parse the hex string
+        let r, g, b, a
+
+        if (hex.length === 3) {
+            // Short notation (#RGB)
+            r = parseInt(hex[0] + hex[0], 16)
+            g = parseInt(hex[1] + hex[1], 16)
+            b = parseInt(hex[2] + hex[2], 16)
+            a = 255;
+        } else if (hex.length === 4) {
+            // Short notation with alpha (#RGBA)
+            r = parseInt(hex[0] + hex[0], 16)
+            g = parseInt(hex[1] + hex[1], 16)
+            b = parseInt(hex[2] + hex[2], 16)
+            a = parseInt(hex[3] + hex[3], 16)
+        } else if (hex.length === 6) {
+            // Full notation (#RRGGBB)
+            r = parseInt(hex.slice(0, 2), 16)
+            g = parseInt(hex.slice(2, 4), 16)
+            b = parseInt(hex.slice(4, 6), 16)
+            a = 255
+        } else if (hex.length === 8) {
+            // Full notation with alpha (#RRGGBBAA)
+            r = parseInt(hex.slice(0, 2), 16)
+            g = parseInt(hex.slice(2, 4), 16)
+            b = parseInt(hex.slice(4, 6), 16)
+            a = parseInt(hex.slice(6, 8), 16)
+        } else {
+            throw new Error('Invalid hex color format');
+        }
+
+        // Convert to 0-1 range
+        this.light_color_mult = new Vec4([
+            r / 255,
+            g / 255,
+            b / 255,
+            a / 255
+        ])
     }
 
     async setup_texture3d(rgba_data: Uint8Array, size: number) {
@@ -192,7 +241,7 @@ class Sim {
         }
 
         // * move light source
-        let light_vel = 0.00005
+        let light_vel = 0.00005 * this.light_speed
         this.light_pos = new Vec3([Math.sin(curr_time*light_vel)*2, 2, Math.cos(curr_time*light_vel)*2])
 
         // * auto restart calculation
