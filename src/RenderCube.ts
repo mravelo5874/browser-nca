@@ -1,8 +1,6 @@
-import { Camera, Cube, Vec3, Vec4 } from './lib/rary'
+import { Camera, Cube, Vec3 } from './lib/rary'
 
-export { RenderCube }
-
-class RenderCube {
+export class RenderCube {
 
     cube: Cube
     gl: WebGL2RenderingContext
@@ -22,7 +20,6 @@ class RenderCube {
     }
 
     init(gl: WebGL2RenderingContext) {
-        {/* CREATE RENDER PROGRAM */}
         let vert = _3D_VERT
         let frag = _3D_FRAG
 
@@ -37,8 +34,8 @@ class RenderCube {
         // used for debugging shaders
         const vertex_log = gl.getShaderInfoLog(vertex_shader)
         const fragment_log = gl.getShaderInfoLog(fragment_shader)
-        if (vertex_log != '') console.log('vertex shader log: ' + vertex_log)
-        if (fragment_log != '') console.log('fragment shader log: ' + fragment_log)
+        if (vertex_log !== '') console.log('vertex shader log: ' + vertex_log)
+        if (fragment_log !== '') console.log('fragment shader log: ' + fragment_log)
 
         // create program
         let program = this.program
@@ -48,13 +45,13 @@ class RenderCube {
 
         // used for debugging program
         const program_log = gl.getProgramInfoLog(program)
-        if (program_log != '') console.log('shader program log: ' + program_log)
+        if (program_log !== '') console.log('shader program log: ' + program_log)
 
         // use program!
         gl.useProgram(this.program)
     }
 
-    render(w: number, h: number, camera: Camera, light: Vec3, texture3d?: WebGLTexture) {
+    render(w: number, h: number, camera: Camera, light: Vec3, pmode: boolean, texture3d?: WebGLTexture) {
         let gl = this.gl
         gl.bindFramebuffer(gl.FRAMEBUFFER, null)
         gl.enable(gl.CULL_FACE)
@@ -65,14 +62,14 @@ class RenderCube {
         gl.viewport(0, 0, w, h)
 
         // setup render cube
-        this.setup_cube_render(gl, camera, light, texture3d)
+        this.setup_cube_render(gl, camera, light, pmode, texture3d)
 
         // draw
         gl.bindFramebuffer(gl.FRAMEBUFFER, null)
         gl.drawElements(gl.TRIANGLES, this.cube.get_idx_u32().length, gl.UNSIGNED_INT, 0)
     }
 
-    setup_cube_render(gl: WebGL2RenderingContext, camera: Camera, light: Vec3, texture3d?: WebGLTexture) {
+    setup_cube_render(gl: WebGL2RenderingContext, camera: Camera, light: Vec3, pmode: boolean, texture3d?: WebGLTexture) {
         let program = this.program as WebGLProgram
         
         // draw cube
@@ -129,6 +126,10 @@ class RenderCube {
         const light_loc = gl.getUniformLocation(program, "u_light")
         gl.uniform3fv(light_loc, new Float32Array(light.xyz))
 
+        // set performace mode uniform
+        const performace_mode_loc = gl.getUniformLocation(program, "u_pmode")
+        gl.uniform1i(performace_mode_loc, pmode ? 1 : 0)
+
         // set volume uniform
         if (texture3d) {
             const volume_loc = gl.getUniformLocation(program, 'u_volume')
@@ -184,6 +185,7 @@ precision highp float;
 
 uniform vec3 u_light;
 uniform highp sampler3D u_volume;
+uniform int u_pmode;
 
 in vec4 v_norm;
 in vec2 v_uv;
@@ -223,6 +225,10 @@ void main() {
     // step 3: set step size to march through volume
     float dt = 0.001;
 
+    if (u_pmode == 1) {
+        dt = 0.005;
+    }
+
     float light_dist = length(u_light) - 0.5;
 
     // step 4: march ray through volume and sample
@@ -260,8 +266,11 @@ void main() {
     }
 
     // Apply dithering to reduce banding
-    float dither_strength = 0.01; // Adjust this value for stronger dithering
-    float dither = (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) * dither_strength;
-    fragColor = my_color + vec4(dither, dither, dither, 0.0);
+    if (u_pmode != 1) {
+        float dither_strength = 0.01; // Adjust this value for stronger dithering
+        float dither = (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) * dither_strength;
+        my_color = my_color + vec4(dither, dither, dither, 0.0);
+    }
+    fragColor = my_color;
 }
 `

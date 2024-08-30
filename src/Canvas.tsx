@@ -1,11 +1,9 @@
 import React from 'react'
 import { Sim } from './Sim'
 
-export { Canvas }
-
 interface CanvasInterface { sim: Sim }
 
-class Canvas extends React.Component<CanvasInterface, {}> {
+export class Canvas extends React.Component<CanvasInterface, {}> {
 
     // reference to canvas to render to
     canvas_ref: React.RefObject<HTMLCanvasElement>
@@ -93,26 +91,36 @@ class Canvas extends React.Component<CanvasInterface, {}> {
         sim.key_down[key.code] = false
     }
 
+    private handle_focus_event() {
+        let sim = this.props.sim
+        sim.set_hidden(document.hidden)
+    }
+
     componentDidMount = () => {
         // only initialize simulation once
         if (!this.comp_mounted) {
             this.comp_mounted = true
-            let canvas = this.canvas_ref.current as HTMLCanvasElement
 
             // prevent right-click menu
-            canvas.addEventListener('contextmenu', (event: any) => event.preventDefault())
+            window.addEventListener('contextmenu', (event: any) => event.preventDefault())
 
             // setup mouse input
-            canvas.addEventListener('mousedown', (mouse: MouseEvent) => this.mouse_start(mouse))
-            canvas.addEventListener('mousemove', (mouse: MouseEvent) => this.mouse_drag(mouse))
-            canvas.addEventListener('mouseup', (mouse: MouseEvent) => this.mouse_end(mouse))
-            canvas.addEventListener('wheel', (event: WheelEvent) => this.mouse_wheel(event))
+            window.addEventListener('mousedown', (mouse: MouseEvent) => this.mouse_start(mouse))
+            window.addEventListener('mousemove', (mouse: MouseEvent) => this.mouse_drag(mouse))
+            window.addEventListener('mouseup', (mouse: MouseEvent) => this.mouse_end(mouse))
+            window.addEventListener('wheel', (event: WheelEvent) => this.mouse_wheel(event))
 
             // event listeners for keyboard input
-            window.addEventListener("keydown", (key: KeyboardEvent) => this.on_key_down(key));
-            window.addEventListener("keyup", (key: KeyboardEvent) => this.on_key_up(key));
+            window.addEventListener("keydown", (key: KeyboardEvent) => this.on_key_down(key))
+            window.addEventListener("keyup", (key: KeyboardEvent) => this.on_key_up(key))
+
+            // event listeners for tab visibility
+            window.addEventListener('focus', (event: FocusEvent) => this.handle_focus_event())
+            window.addEventListener('blur', (event: FocusEvent) => this.handle_focus_event())
+            window.addEventListener('visibilitychange', (event: Event) => this.handle_focus_event())
 
             // setup simulation
+            let canvas = this.canvas_ref.current as HTMLCanvasElement
             let sim = this.props.sim
             sim.init(canvas)
             sim.start()

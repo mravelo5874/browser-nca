@@ -1,13 +1,11 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Sim } from './Sim';
-
-export { UI }
 
 interface UIInterface {
     sim: Sim
 }
 
-class UI extends React.Component<UIInterface, {}> {
+export class UI extends React.Component<UIInterface, {}> {
 
     comp_mounted: boolean
     sidebar_left_open: boolean
@@ -190,6 +188,9 @@ class UI extends React.Component<UIInterface, {}> {
                                 <option value='burger'>🍔 burger</option>
                                 <option value='cowboy'>🤠 cowboy</option>
                                 <option value='earth'>🌍 earth</option>
+                                <option value='cactus'>🌵 cactus</option>
+                                <option value='maze'>🕹️ maze</option>
+                                <option value='minicube'>◻️ minicube</option>
                             </select>
 
                             <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0.5em'}}>

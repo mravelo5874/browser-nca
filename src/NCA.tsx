@@ -1,15 +1,16 @@
 import * as ort from 'onnxruntime-web'
 import * as vox_data from './data/all'
 
-export { NCA, NCAmodels }
-
-const NCAmodels: string[] = [
+export const NCAmodels: string[] = [
     'oak',
     'rubiks',
     'sphere',
     'burger',
     'cowboy',
-    'earth'
+    'earth',
+    'cactus',
+    'maze',
+    'minicube'
 ]
 
 const oak_data = {
@@ -48,7 +49,25 @@ const earth_data = {
     'seed': new Float32Array(vox_data.earth_seed)
 }
 
-class NCA
+const cactus_data = {
+    'model': 'cactus_iso3_v1',
+    'size': 33,
+    'seed': new Float32Array(vox_data.cactus_seed)
+}
+
+const maze_data = {
+    'model': 'maze25_aniso_nodmg',
+    'size': 33,
+    'seed': new Float32Array(vox_data.maze_seed)
+}
+
+const minicube_data = {
+    'model': 'minicube5_aniso_v0',
+    'size': 9,
+    'seed': new Float32Array(vox_data.minicube_seed)
+}
+
+export class NCA
 {
     private transpose: ort.InferenceSession | null = null
     private state: Float32Array | null = null
@@ -71,7 +90,7 @@ class NCA
     public load_model_worker(model: string) {
         // * assert model is valid
         if (!NCAmodels.includes(model)) {
-            console.log('[NCA -- load_model_worker] invalid model: \"'+model+'\"')
+            console.log('[NCA -- load_model_worker] invalid model: "'+model+'"')
         }
         // * terinate current worker
         this.terminate()
@@ -107,6 +126,21 @@ class NCA
             this.model = earth_data['model']
             this.size = earth_data['size']
             this.state = earth_data['seed']
+            break
+        case 'cactus':
+            this.model = cactus_data['model']
+            this.size = cactus_data['size']
+            this.state = cactus_data['seed']
+            break
+        case 'maze':
+            this.model = maze_data['model']
+            this.size = maze_data['size']
+            this.state = maze_data['seed']
+            break
+        case 'minicube':
+            this.model = minicube_data['model']
+            this.size = minicube_data['size']
+            this.state = minicube_data['seed']
             break
         }
         this.convert_to_rgba()
@@ -208,7 +242,6 @@ class NCA
         if (!this.size) return
 
         // * transpose data
-        let feeds: Record<string, ort.Tensor> = {};
         const input = new ort.Tensor('float32', this.state, [1, 16, this.size, this.size, this.size])
 		const input_feeds = { 'input': input }
         const output = await this.transpose.run(input_feeds)

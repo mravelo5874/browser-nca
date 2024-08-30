@@ -1,32 +1,16 @@
 import { webgl_util } from './WebGL_Util'
 import { CanvasResize } from './CanvasResize'
 import { UI } from './UI'
-import { delay, random_uint8_volume } from './Util'
+import { delay } from './Util'
 import { Camera, Vec2, Vec3, Vec4 } from './lib/rary'
 import { RenderCube } from './RenderCube'
 import { RenderShadow } from './RenderShadow'
 import { PostProcessing } from './PostProcessing'
 import { NCA } from './NCA'
 
-// [TODO]
-//      - postprocess antialiasing using WebGLRenderTargets (https://discourse.threejs.org/t/how-to-get-canvas-as-a-texture-to-chain-together-shaders/16056)
-//      - fix lighting engine (large alpha values through volume into plane are too dark)
-//      - add ability to add delay to model steps (to view model grow slower or in real-time)
+export class Sim {
 
-export { Sim }
-
-class Sim {
-
-    // simulation components
-    paused: boolean
-    bg: Vec4
-    light_speed: number = 1.0
-    light_pos: Vec3
-    light_radius: number
-    light_color_mult: Vec4
-    static zoom: number = 1.8
-
-    // render components
+    // * core render components
     canvas: HTMLCanvasElement | null = null
     context: WebGL2RenderingContext | null = null
     resize: CanvasResize | null = null
@@ -35,14 +19,24 @@ class Sim {
     texture3d: WebGLTexture | null = null
     nca: NCA
     step: number = 0
+    
+    // * core simulation components
+    paused: boolean
+    bg: Vec4
+    light_speed: number = 1.0
+    light_pos: Vec3
+    light_radius: number
+    light_color_mult: Vec4
+    static zoom: number = 1.8
 
-    // render layers
+    // * render layers
     rendershadow: RenderShadow | null = null
     rendercube: RenderCube | null = null
     postprocess: PostProcessing | null = null
     use_postprocess: boolean = true
     
-    // user input
+    // * user input
+    key_down: Record<string, boolean>
     is_input: boolean = false
     mouse_button: number = 0
     cam_sense: number = 0.25
@@ -52,35 +46,44 @@ class Sim {
     min_zoom: number = 0.0
     max_zoom: number = 8.0
     prev_d: Vec2 = Vec2.zero
+    is_hidden: boolean = false
 
-    // auto restart feature
+    // * auto restart feature
     auto_restart: boolean = true
     auto_restart_steps: number = 250
 
-    // key input dictionary
-    key_down: Record<string, boolean>
-
-    // used to calculate time and fps
-    fps: number = 0
-    start_time: number = 0
-    prev_time: number = 0
-    curr_delta_time: number = 0
-    prev_fps_time: number = 0
+    // * calculate time and fps
+    fps: number = 0.0
+    start_time: number = 0.0
+    prev_time: number = 0.0
+    curr_delta_time: number = 0.0
+    prev_fps_time: number = 0.0
     frame_count: number = 0
+
+    // * performace mode
+    // app automatically enters performace mode if
+    // fps is at or below threshold for set duration
+    perfomance_mode: boolean = false
+    low_fps_tracker: number = 0.0
+    static low_fps_duration: number = 3000
+    static low_fps_threshold: number = 20
 
     constructor() {
         this.key_down = {}
+        this.prev_time = Date.now()
         this.paused = false
         this.bg = new Vec4([0.0, 0.0, 0.0, 1.0])
         this.light_color_mult = new Vec4([0.1, 0.2, 0.3, 1.0])
         this.light_pos = new Vec3([2, 2, 2])
         this.light_radius = 8.0
 
-        // * setup NCA
+        // * initialize NCA
         this.nca = new NCA()
         this.nca.load_model_worker('oak')
         console.log('simulation constructed...')
     }
+
+    
     
     init(_canvas: HTMLCanvasElement) {
         this.canvas = _canvas
@@ -114,6 +117,10 @@ class Sim {
 
     public set_light_speed(val: number) {
         this.light_speed = val
+    }
+
+    public set_hidden(val: boolean) {
+        this.is_hidden = val
     }
 
     public set_ground_color(color: string) {
@@ -228,6 +235,26 @@ class Sim {
             this.frame_count = 0
             this.prev_fps_time = Date.now()
         }
+
+        // * perfomance mode detection (while not hidden)
+        if (!this.perfomance_mode && !this.is_hidden) {
+
+            // * check low fps threshold
+            if (this.fps <= Sim.low_fps_threshold && this.fps !== 0) {
+                this.low_fps_tracker += this.curr_delta_time
+            }
+            // * otherwise reset tracker
+            else {
+                this.low_fps_tracker = 0.0
+            }
+            
+            // * detected low fps for sufficient duration
+            // * entering performace mode
+            if (this.low_fps_tracker >= Sim.low_fps_duration) {
+                this.perfomance_mode = true
+                console.log('detected low fps -- entering performace mode')
+            }
+        }
         
         // * update ui
         if (this.ui) this.ui.update()
@@ -281,8 +308,8 @@ class Sim {
         // nca data available
         if (this.texture3d) {
             this.rendershadow?.render(w, h, camera, this.bg, this.light_pos, this.light_radius, this.light_color_mult, this.texture3d)
-            if (this.use_postprocess) this.postprocess?.render(w, h, 4.0, this.canvas!)
-            this.rendercube?.render(w, h, camera, this.light_pos, this.texture3d)
+            if (this.use_postprocess && !this.perfomance_mode) this.postprocess?.render(w, h, 4.0, this.canvas!)
+            this.rendercube?.render(w, h, camera, this.light_pos, this.perfomance_mode, this.texture3d)
 
         // * no nca data
         } else {

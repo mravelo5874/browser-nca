@@ -1,8 +1,6 @@
 import { Camera, Plane, Vec3, Vec4 } from './lib/rary'
 
-export { RenderShadow }
-
-class RenderShadow 
+export class RenderShadow 
 {
     plane: Plane
     gl: WebGL2RenderingContext
@@ -19,7 +17,6 @@ class RenderShadow
     }
 
     init(gl: WebGL2RenderingContext) {
-        {/* CREATE RENDER PROGRAM */}
         let vert = _3D_VERT
         let frag = _3D_FRAG
 
@@ -34,8 +31,8 @@ class RenderShadow
         // used for debugging shaders
         const vertex_log = gl.getShaderInfoLog(vertex_shader)
         const fragment_log = gl.getShaderInfoLog(fragment_shader)
-        if (vertex_log != '') console.log('vertex shader log: ' + vertex_log)
-        if (fragment_log != '') console.log('fragment shader log: ' + fragment_log)
+        if (vertex_log !== '') console.log('vertex shader log: ' + vertex_log)
+        if (fragment_log !== '') console.log('fragment shader log: ' + fragment_log)
 
         // create program
         let program = this.program
@@ -45,7 +42,7 @@ class RenderShadow
 
         // used for debugging program
         const program_log = gl.getProgramInfoLog(program)
-        if (program_log != '') console.log('shader program log: ' + program_log)
+        if (program_log !== '') console.log('shader program log: ' + program_log)
 
         // use program!
         gl.useProgram(this.program)
