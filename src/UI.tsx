@@ -153,13 +153,17 @@ export class UI extends React.Component<UIInterface, {}> {
                         <h4 id='ui-title'>How does it work?</h4>
                         <h5 id='ui-text'>What a great question! As previously mentioned, nca are made up of a bunch of <i>cells</i> (each little box you see is a single cell).</h5>
                         <h5 id='ui-text'>Each step, every cell looks at its <i>neighboring</i> cells and decides what color and how transparent it should be. After enough steps, the model grows to become its target object!</h5>
-                        <h5 id='ui-text' style={{paddingBottom:'0.5em'}}>This is a gross simplification of how nca work. I wrote my entire +100 page thesis on the subject (available <a href='https://repositories.lib.utexas.edu/items/59d8a230-6f66-4cfe-90ae-1ee82c4842c7'><i>here</i></a>) if you are looking for a more comprehensive answer.</h5>
+                        <h5 id='ui-text' style={{paddingBottom:'0.5em'}}>This is a gross simplification of how nca work. I wrote an entire +100 page thesis on the subject (available <a href='https://repositories.lib.utexas.edu/items/59d8a230-6f66-4cfe-90ae-1ee82c4842c7'><i>here</i></a>) if you are looking for a more comprehensive answer.</h5>
                     
                         <hr/>
 
                         <h4 id='ui-title'>Are there more?</h4>
                         <h5 id='ui-text'>Sure! Click on the <big>⚙️</big> button at the top-right of the window to open up the control panel. You can change the model using the drop-down labeled <i>select model</i>.</h5>
-                        <h5 id='ui-text'>You can also close this panel by clicking the <big>🤔</big> button at the top-right of this panel.</h5>
+                        <h5 id='ui-text' style={{paddingBottom:'4em'}}>You can also close this panel by clicking the <big>🤔</big> button at the top-right of this panel.</h5>
+
+                        <a href='https://marcoravelo.com/continuous-cellular-automata/' className='a_button'>🚀 Visit CCA App</a>
+
+                        <div style={{height:'4em'}}/>
                     </div>
 
                     <button id='sidebar-left-button' className={!this.sidebar_left_open ? 'ui_button closed': 'ui_button'} onClick={this.toggle_sidebar_left}>🤔</button>
@@ -211,7 +215,6 @@ export class UI extends React.Component<UIInterface, {}> {
                             <input type='range' id='light-speed-slider' min='0.0' max='50.0' step='1.0' onChange={this.change_light_speed}/>
                             <h4 style={{fontSize:'1em', paddingLeft:'0.5em'}}>light speed</h4>
                         </div> */}
-
                         
                     </div>
                     <button id='sidebar-right-button' className={'ui_button closed'} onClick={this.toggle_sidebar_right}>⚙️</button>

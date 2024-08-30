@@ -28,6 +28,7 @@ LEFT SIDEBAR
 
 #sidebar-left {
   width: 32em;
+  height: 100%;
   transition: 0.5s ease-in-out;
 
   /* position */
@@ -35,6 +36,7 @@ LEFT SIDEBAR
   top:0px;
   bottom:0px;
   left:0px;
+  direction: rtl;
 }
 
 #sidebar-left.closed {
@@ -216,6 +218,31 @@ i {
   box-shadow: white 0.1em 0.1em 0.1em;
 }
 
+.a_button {
+  position: relative;
+  /* text */
+  color: rgba(255, 255, 255, 0.8);
+  font-family: monospace;
+  font-size: 16px;
+  text-align: center;
+  /* padding */
+  padding-top: 0.5em;
+  padding-left: 0.7em;
+  padding-right: 0.7em;
+  padding-bottom: 0.5em;
+  /* border */
+  border: none;
+  text-decoration-line: none;
+  background-color: rgb(22, 4, 39);
+  box-shadow: black 0.1em 0.1em 0.1em;
+}
+
+.a_button:hover {
+  color: rgba(0, 0, 0, 0.8);
+  background-color: rgb(255, 196, 87);
+  box-shadow: black 0.2em 0.2em 0.2em;
+}
+
 .ui_button:active {
   -webkit-transition: .2s;
   transition: .2s;
@@ -236,4 +263,37 @@ i {
 
 .dropdown_option {
   padding: 0.5em;
+}
+
+/*
+// #################
+// CUSTOM SCROLL BAR
+// #################
+*/
+
+/* width */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.5);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #ffffff;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 119, 255, 0.85);
+}
+
+::-webkit-scrollbar-thumb:active {
+  -webkit-transition: .4s;
+  transition: .4s;
+
+  background: rgba(255, 193, 99, 0.85);
 }
