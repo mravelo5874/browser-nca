@@ -5,13 +5,13 @@ interface CanvasInterface { sim: Sim }
 
 export class Canvas extends React.Component<CanvasInterface, {}> {
 
-    // reference to canvas to render to
+    // * reference to canvas object
     canvas_ref: React.RefObject<HTMLCanvasElement>
 
-    // component has been mounted bool
+    // * has component has been mounted?
     comp_mounted: boolean
 
-    // mouse variables
+    // * mouse position variables
     prev_x: number
     prev_y: number
 
@@ -21,7 +21,37 @@ export class Canvas extends React.Component<CanvasInterface, {}> {
         this.comp_mounted = false
         this.prev_x = 0
         this.prev_y = 0
-        console.log('canvas constructed...');
+        console.log('[Canvas.tsx] canvas constructed')
+    }
+
+    componentDidMount = () => {
+        if (!this.comp_mounted) {
+            this.comp_mounted = true
+
+            // * prevent right-click menu
+            window.addEventListener('contextmenu', (event: any) => event.preventDefault())
+
+            // * setup mouse inputs
+            window.addEventListener('mousedown', (mouse: MouseEvent) => this.mouse_start(mouse))
+            window.addEventListener('mousemove', (mouse: MouseEvent) => this.mouse_drag(mouse))
+            window.addEventListener('mouseup', (mouse: MouseEvent) => this.mouse_end())
+            window.addEventListener('wheel', (event: WheelEvent) => this.mouse_wheel(event))
+
+            // * event listeners for keyboard inputs
+            window.addEventListener("keydown", (key: KeyboardEvent) => this.on_key_down(key))
+            window.addEventListener("keyup", (key: KeyboardEvent) => this.on_key_up(key))
+
+            // * event listeners for window visibility
+            window.addEventListener('focus', () => this.handle_focus_event())
+            window.addEventListener('blur', () => this.handle_focus_event())
+            window.addEventListener('visibilitychange', () => this.handle_focus_event())
+
+            // * initialize simulation
+            let canvas = this.canvas_ref.current as HTMLCanvasElement
+            let sim = this.props.sim
+            sim.init(canvas)
+            sim.start()
+        }
     }
 
 
@@ -33,7 +63,7 @@ export class Canvas extends React.Component<CanvasInterface, {}> {
         return { x: event.clientX - rect.left, y: event.clientY - rect.top }
     }
       
-    // assumes target or event.target is canvas
+    // * assumes target or event.target is canvas
     private get_mouse_canvas(event: MouseEvent, target: HTMLCanvasElement) {
         target = target || event.target
         var pos = this.get_mouse_relative(event, target)
@@ -42,94 +72,63 @@ export class Canvas extends React.Component<CanvasInterface, {}> {
         return pos
     }
 
+    // * fires when mosue button pressed
     private mouse_start(mouse: MouseEvent) {
-        let canvas = this.canvas_ref.current as HTMLCanvasElement;
+        let canvas = this.canvas_ref.current as HTMLCanvasElement
         const pos = this.get_mouse_canvas(mouse, canvas)
         this.prev_x = pos.x / canvas.width
         this.prev_y = pos.y / canvas.height
-        
-        // update sim about user input
         let sim = this.props.sim
         sim.mouse_start(this.prev_x, this.prev_y, mouse.buttons)
     }
 
+    // * fires when mouse is moved 
     private mouse_drag(mouse: MouseEvent) {
-        // draw with mouse
-        let canvas = this.canvas_ref.current as HTMLCanvasElement;
-        const pos = this.get_mouse_canvas(mouse, canvas);
+        let canvas = this.canvas_ref.current as HTMLCanvasElement
+        const pos = this.get_mouse_canvas(mouse, canvas)
         const x = pos.x / canvas.width
         const y = pos.y / canvas.height
         const dx = x - this.prev_x
         const dy = y - this.prev_y
         this.prev_x = x
         this.prev_y = y
-
-        // update sim about user input
         let sim = this.props.sim
         sim.mouse_drag(x, y, dx, dy)
     }
 
-    private mouse_end(mouse: MouseEvent) {
-        // update sim about user input
+    // * fires when mouse button is unpressed
+    private mouse_end() {
         let sim = this.props.sim
         sim.mouse_end()
     }
 
+    //* fires when mouse wheel is used
     private mouse_wheel(wheel: WheelEvent) {
-        // update sim about user input
         let sim = this.props.sim
         sim.mouse_wheel(wheel.deltaY)
     }
 
+    // * fires when keyboard key is pressed
     private on_key_down(key: KeyboardEvent) {
         let sim = this.props.sim
         sim.key_down[key.code] = true
     }
 
+    // * fires when keyboard key is unpressed
     private on_key_up(key: KeyboardEvent) {
         let sim = this.props.sim
         sim.key_down[key.code] = false
     }
 
+    // * fires when window is focused or unfocused
     private handle_focus_event() {
         let sim = this.props.sim
         sim.set_hidden(document.hidden)
     }
 
-    componentDidMount = () => {
-        // only initialize simulation once
-        if (!this.comp_mounted) {
-            this.comp_mounted = true
-
-            // prevent right-click menu
-            window.addEventListener('contextmenu', (event: any) => event.preventDefault())
-
-            // setup mouse input
-            window.addEventListener('mousedown', (mouse: MouseEvent) => this.mouse_start(mouse))
-            window.addEventListener('mousemove', (mouse: MouseEvent) => this.mouse_drag(mouse))
-            window.addEventListener('mouseup', (mouse: MouseEvent) => this.mouse_end(mouse))
-            window.addEventListener('wheel', (event: WheelEvent) => this.mouse_wheel(event))
-
-            // event listeners for keyboard input
-            window.addEventListener("keydown", (key: KeyboardEvent) => this.on_key_down(key))
-            window.addEventListener("keyup", (key: KeyboardEvent) => this.on_key_up(key))
-
-            // event listeners for tab visibility
-            window.addEventListener('focus', (event: FocusEvent) => this.handle_focus_event())
-            window.addEventListener('blur', (event: FocusEvent) => this.handle_focus_event())
-            window.addEventListener('visibilitychange', (event: Event) => this.handle_focus_event())
-
-            // setup simulation
-            let canvas = this.canvas_ref.current as HTMLCanvasElement
-            let sim = this.props.sim
-            sim.init(canvas)
-            sim.start()
-        }
-    }
-
     render() {
         return(
             <canvas ref={this.canvas_ref} style={{imageRendering:'pixelated'}}></canvas>
-        );
+        )
     }
 }

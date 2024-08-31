@@ -1,71 +1,5 @@
 import * as ort from 'onnxruntime-web'
-import * as vox_data from './data/all'
-
-export const NCAmodels: string[] = [
-    'oak',
-    'rubiks',
-    'sphere',
-    'burger',
-    'cowboy',
-    'earth',
-    'cactus',
-    'maze',
-    'minicube'
-]
-
-const oak_data = {
-    'model': 'oak_aniso_single',
-    'size': 32,
-    'seed': new Float32Array(vox_data.oak_seed)
-}
-
-const sphere_data = {
-    'model': 'sphere16_iso3_thesis',
-    'size': 24,
-    'seed': new Float32Array(vox_data.sphere_seed)
-}
-
-const rubiks_data = {
-    'model': 'rubiks_black_cube_iso3_v3',
-    'size': 25,
-    'seed': new Float32Array(vox_data.rubiks_seed)
-}
-
-const burger_data = {
-    'model': 'burger_aniso',
-    'size': 24,
-    'seed': new Float32Array(vox_data.burger_seed)
-}
-
-const cowboy_data = {
-    'model': 'cowboy16_iso2_v13',
-    'size': 24,
-    'seed': new Float32Array(vox_data.cowboy_seed)
-}
-
-const earth_data = {
-    'model': 'earth_aniso_single',
-    'size': 32,
-    'seed': new Float32Array(vox_data.earth_seed)
-}
-
-const cactus_data = {
-    'model': 'cactus_iso3_v1',
-    'size': 33,
-    'seed': new Float32Array(vox_data.cactus_seed)
-}
-
-const maze_data = {
-    'model': 'maze25_aniso_nodmg',
-    'size': 33,
-    'seed': new Float32Array(vox_data.maze_seed)
-}
-
-const minicube_data = {
-    'model': 'minicube5_aniso_v0',
-    'size': 9,
-    'seed': new Float32Array(vox_data.minicube_seed)
-}
+import * as data from './data/nca-data'
 
 export class NCA
 {
@@ -73,10 +7,8 @@ export class NCA
     private state: Float32Array | null = null
     private size: number | null = null
     private model: string | null = null
-
     private worker: Worker | null = null
     private current_worker: string | null = null
-
     private worker_ready: boolean = false
     private worker_running: boolean = false
     private worker_steps: number = 0
@@ -85,76 +17,6 @@ export class NCA
     constructor () { 
         this.worker_ready = false
         this.init_transpose_model()
-    }
-
-    public load_model_worker(model: string) {
-        // * assert model is valid
-        if (!NCAmodels.includes(model)) {
-            console.log('[NCA -- load_model_worker] invalid model: "'+model+'"')
-        }
-        // * terinate current worker
-        this.terminate()
-        this.worker_steps = 0
-        // * init model worker
-        switch (model) {
-        case 'oak':
-            this.model = oak_data['model']
-            this.size = oak_data['size']
-            this.state = oak_data['seed']
-            break
-        case 'sphere':
-            this.model = sphere_data['model']
-            this.size = sphere_data['size']
-            this.state = sphere_data['seed']
-            break
-        case 'rubiks':
-            this.model = rubiks_data['model']
-            this.size = rubiks_data['size']
-            this.state = rubiks_data['seed']
-            break
-        case 'burger':
-            this.model = burger_data['model']
-            this.size = burger_data['size']
-            this.state = burger_data['seed']
-            break
-        case 'cowboy':
-            this.model = cowboy_data['model']
-            this.size = cowboy_data['size']
-            this.state = cowboy_data['seed']
-            break
-        case 'earth':
-            this.model = earth_data['model']
-            this.size = earth_data['size']
-            this.state = earth_data['seed']
-            break
-        case 'cactus':
-            this.model = cactus_data['model']
-            this.size = cactus_data['size']
-            this.state = cactus_data['seed']
-            break
-        case 'maze':
-            this.model = maze_data['model']
-            this.size = maze_data['size']
-            this.state = maze_data['seed']
-            break
-        case 'minicube':
-            this.model = minicube_data['model']
-            this.size = minicube_data['size']
-            this.state = minicube_data['seed']
-            break
-        }
-        this.convert_to_rgba()
-    
-        this.current_worker = model
-        this.worker = new Worker(new URL('./NCAWorker.ts', import.meta.url), { type: 'module' })
-        this.worker.postMessage({ type: 'init', data: [this.model] })
-        this.worker.onmessage = (event) => {
-            if (event.data.type === 'init-complete') {
-                this.worker_ready = true
-                // console.log('[NCA -- load_model] worker is ready!')
-            }
-        }
-  
     }
 
     public update() {
@@ -167,7 +29,6 @@ export class NCA
     }
 
     public terminate() {
-        // * terinate current worker
         this.worker_ready = false
         this.worker_running = false
         this.worker?.terminate()
@@ -190,14 +51,79 @@ export class NCA
         return this.worker_steps
     }
 
+    public load_model_worker(model: string) {
+        // * assert model is valid
+        if (!data.NCAmodels.includes(model)) {
+            console.log('[NCA -- load_model_worker] invalid model: "'+model+'"')
+        }
+        // * terinate current worker
+        this.terminate()
+        this.worker_steps = 0
+        // * init model worker
+        switch (model) {
+        case 'oak':
+            this.model = data.oak_data['model']
+            this.size = data.oak_data['size']
+            this.state = data.oak_data['seed']
+            break
+        case 'sphere':
+            this.model = data.sphere_data['model']
+            this.size = data.sphere_data['size']
+            this.state = data.sphere_data['seed']
+            break
+        case 'rubiks':
+            this.model = data.rubiks_data['model']
+            this.size = data.rubiks_data['size']
+            this.state = data.rubiks_data['seed']
+            break
+        case 'burger':
+            this.model = data.burger_data['model']
+            this.size = data.burger_data['size']
+            this.state = data.burger_data['seed']
+            break
+        case 'cowboy':
+            this.model = data.cowboy_data['model']
+            this.size = data.cowboy_data['size']
+            this.state = data.cowboy_data['seed']
+            break
+        case 'earth':
+            this.model = data.earth_data['model']
+            this.size = data.earth_data['size']
+            this.state = data.earth_data['seed']
+            break
+        case 'cactus':
+            this.model = data.cactus_data['model']
+            this.size = data.cactus_data['size']
+            this.state = data.cactus_data['seed']
+            break
+        case 'maze':
+            this.model = data.maze_data['model']
+            this.size = data.maze_data['size']
+            this.state = data.maze_data['seed']
+            break
+        case 'minicube':
+            this.model = data.minicube_data['model']
+            this.size = data.minicube_data['size']
+            this.state = data.minicube_data['seed']
+            break
+        }
+        this.convert_to_rgba()
+        this.current_worker = model
+        this.worker = new Worker(new URL('./NCAWorker.ts', import.meta.url), { type: 'module' })
+        console.log(`[NCA.tsx] loaded new model: ${model}`)
+        this.worker.postMessage({ type: 'init', data: [this.model] })
+        this.worker.onmessage = (event) => {
+            if (event.data.type === 'init-complete') {
+                this.worker_ready = true
+                // console.log('[NCA -- load_model] worker is ready!')
+            }
+        }
+  
+    }
+
     public start_model() {
-        // * assert worker is ready
         if (!this.worker_ready) return
-        
-        // * assert worker is not already running
         if (this.worker_running) return
-        
-        // * begin worker loop
         this.worker_running = true
         this.worker_loop()
     }
@@ -231,7 +157,7 @@ export class NCA
     private async convert_to_rgba() {  
         // * if transpose session is null -- create it
         if (!this.transpose) {
-            console.log('[NCA -- convert_to_rgba] transpose model is not created yet -- creating now')
+            //console.log('[NCA -- convert_to_rgba] transpose model is not created yet -- creating now')
             await this.init_transpose_model().then(() => {
                 this.convert_to_rgba()
                 return

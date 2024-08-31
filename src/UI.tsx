@@ -11,7 +11,7 @@ export class UI extends React.Component<UIInterface, {}> {
     sidebar_left_open: boolean
     sidebar_right_open: boolean
 
-    // text nodes
+    // * dynamic text nodes
     fps_node: Text | null = null
     res_node: Text | null = null
     step_node: Text | null = null
@@ -19,29 +19,29 @@ export class UI extends React.Component<UIInterface, {}> {
     constructor(props: UIInterface) {
         super(props)
         
-        // component not mounted
+        // * component not mounted
         this.comp_mounted = false
 
-        // start with sidebar open
+        // * start with no sidebars open
         this.sidebar_left_open = false
         this.sidebar_right_open = false
         
-        // set simulation ui
+        // * set simulation ui
         this.props.sim.ui = this
 
-        // bind 'this' for class functions
+        // * bind 'this' for class functions
+        this.load_model = this.load_model.bind(this)
         this.toggle_sidebar_left = this.toggle_sidebar_left.bind(this)
         this.toggle_sidebar_right = this.toggle_sidebar_right.bind(this)
-        this.load_model = this.load_model.bind(this)
         this.toggle_auto_reset = this.toggle_auto_reset.bind(this)
         this.change_ground_color = this.change_ground_color.bind(this)
         this.change_light_speed = this.change_light_speed.bind(this)
 
-        console.log('ui constructed...')
+        console.log('[UI.tsx] ui constructed')
     }
 
     componentDidMount = () => {
-        // only initialize simulation once
+        // * open the left sidebar after 1 second
         if (!this.comp_mounted) {
             this.comp_mounted = true
             setTimeout(() => {
@@ -52,19 +52,19 @@ export class UI extends React.Component<UIInterface, {}> {
     }
 
     update_res_node(_width: number, _height: number) {
-        // find resolution text node
+        // * find resolution text node
         if (!this.res_node) {
             let res_element = document.querySelector('#res')
             this.res_node = document.createTextNode('')
             res_element?.appendChild(this.res_node)
             this.res_node.nodeValue = ''
         }
-        // update text
+        // * update text
         if (this.res_node) this.res_node.nodeValue = _width.toFixed(0) + ' x ' + _height.toFixed(0)
     }
 
     update() {
-        // find fps text node
+        // * update fps text
         if (!this.fps_node) {
             let fps_element = document.querySelector('#fps')
             this.fps_node = document.createTextNode('')
@@ -75,7 +75,7 @@ export class UI extends React.Component<UIInterface, {}> {
             this.fps_node.nodeValue = this.props.sim.fps.toFixed(0)
         }
 
-        // find step text node
+        // * update step text
         if (!this.step_node) {
             let step_element = document.querySelector('#step')
             this.step_node = document.createTextNode('')

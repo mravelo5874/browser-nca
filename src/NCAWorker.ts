@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-import * as ort from 'onnxruntime-web';
+import * as ort from 'onnxruntime-web'
 
 const pwd = `${self.location.origin}`
 
@@ -42,6 +42,7 @@ class NCAWorker
 }
 
 const worker = new NCAWorker()
+
 onmessage = async (event: MessageEvent) => {
 	// * initialize worker
 	if (event.data.type === 'init') {

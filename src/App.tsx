@@ -3,15 +3,9 @@ import { Sim } from './Sim'
 import { Canvas } from './Canvas'
 import { UI } from './UI'
 
-export { App }
-
 interface AppInterface { sim: Sim }
 
-class App extends React.Component<AppInterface, {}> {
-	constructor (props: AppInterface) {
-		super(props)
-	}
-
+export class App extends React.Component<AppInterface, {}> {
 	render() {
 		return(
 			<>
