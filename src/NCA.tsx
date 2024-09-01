@@ -13,6 +13,7 @@ export class NCA
     private worker_running: boolean = false
     private worker_steps: number = 0
     private rgba: Uint8Array | null = null
+    private apply_damage_next: boolean = false
 
     constructor () { 
         this.worker_ready = false
@@ -21,6 +22,13 @@ export class NCA
 
     public update() {
         this.start_model()
+    }
+
+    public start_model() {
+        if (!this.worker_ready) return
+        if (this.worker_running) return
+        this.worker_running = true
+        this.worker_loop()
     }
 
     public reset() {
@@ -49,6 +57,10 @@ export class NCA
 
     public get_worker_steps() {
         return this.worker_steps
+    }
+
+    public apply_damage() {
+        this.apply_damage_next = true
     }
 
     public load_model_worker(model: string) {
@@ -121,19 +133,20 @@ export class NCA
   
     }
 
-    public start_model() {
-        if (!this.worker_ready) return
-        if (this.worker_running) return
-        this.worker_running = true
-        this.worker_loop()
-    }
-
     private async worker_loop() {
         if (!this.worker) return
         if (!this.worker_running) return
 
+        let worker_cmd = 'run'
+
+        // * apply damage to current state
+        if (this.apply_damage_next) {
+            this.apply_damage_next = false
+            worker_cmd = 'dmg'
+        }
+
         // * send current state to worker
-        this.worker.postMessage({ type: 'run', data: [this.state, this.size]})
+        this.worker.postMessage({ type: worker_cmd, data: [this.state, this.size]})
         this.worker.onmessage = (event) => {
 
             // * recieve new state -- convert to rgba

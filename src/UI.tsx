@@ -201,7 +201,7 @@ export class UI extends React.Component<UIInterface, {}> {
 
                             <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0.5em'}}>
                                 <input type='checkbox' id='toggle-auto-reset' onClick={this.toggle_auto_reset} defaultChecked/>
-                                <h4 style={{fontSize:'1em', paddingLeft:'0.5em'}}>auto reset (after 250 steps)</h4>
+                                <h4 style={{fontSize:'1em', paddingLeft:'0.5em'}}>auto reset (after 500 steps)</h4>
                             </div>
                         </div>
 

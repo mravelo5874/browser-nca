@@ -23,6 +23,7 @@ export class Sim {
     ui: UI | null = null
     nca: NCA
     step: number = 0
+    prev_step: number = 0
     paused: boolean
     bg: Vec4
     is_hidden: boolean = false
@@ -53,7 +54,12 @@ export class Sim {
 
     // * auto restart feature
     auto_restart: boolean = true
-    auto_restart_steps: number = 250
+    auto_restart_steps: number = 500
+
+    // * auto apply damage feature
+    auto_damage: boolean = true
+    auto_damage_steps: number = 100
+    auto_damage_count: number = 0
 
     // * calculate time and fps
     fps: number = 0.0
@@ -213,10 +219,22 @@ export class Sim {
         if (this.get_key('KeyR') || reset) {
             this.nca.reset()
             this.step = 0
+            this.prev_step = 0
         }
         else {
             this.nca.update()
+            this.prev_step = this.step
             this.step = this.nca.get_worker_steps()
+        }
+
+        // * auto damage calculation
+        if (this.auto_damage) {
+            const delta_step = this.step - this.prev_step
+            this.auto_damage_count += delta_step
+            if (this.auto_damage_count >= this.auto_damage_steps) {
+                this.auto_damage_count = 0
+                this.nca.apply_damage()
+            }
         }
 
         // * get rbga data from NCA worker
