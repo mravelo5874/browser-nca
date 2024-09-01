@@ -138,32 +138,34 @@ export class UI extends React.Component<UIInterface, {}> {
             <>
                 <div id='sidebar-left' className={!this.sidebar_left_open ? 'closed': ''}>
                     <div id='sidebar-left-panel' className={!this.sidebar_left_open ? 'closed': ''}>
-                        <h4 id='ui-title'>What am I looking at?</h4>
-                        <h5 id='ui-text'>You are looking at a <i>neural cellular automaton</i> (nca for short). More specifically, you are seeing an nca model growing into its target object (an oak tree!).</h5>
-                        <h5 id='ui-text'>Lets break down each word in nca:</h5>
-                        <h4 id='ui-sub-title'>🧠 neural:</h4>
-                        <h5 id='ui-text'>The underlying mechanism powering the model is a trained <i>neural network</i>.</h5>
-                        <h4 id='ui-sub-title'>🦠 cellular:</h4>
-                        <h5 id='ui-text'>Instead of being a single unit, a model is made up of a bunch of individual <i>cells</i>.</h5>
-                        <h4 id='ui-sub-title'>🤖 automata:</h4>
-                        <h5 id='ui-text' style={{paddingBottom:'0.5em'}}>A model grows on its own by repeatedly applying steps <i>automatically</i> as if it were a living organism.</h5>
+                        <div id='sidebar-left-inside'>
+                            <h4 id='ui-title'>What am I looking at?</h4>
+                            <h5 id='ui-text'>You are looking at a <i>neural cellular automaton</i> (nca for short). More specifically, you are seeing an nca model growing into its target object (an oak tree!).</h5>
+                            <h5 id='ui-text'>Lets break down each word in nca:</h5>
+                            <h4 id='ui-sub-title'>🧠 neural:</h4>
+                            <h5 id='ui-text'>The underlying mechanism powering the model is a trained <i>neural network</i>.</h5>
+                            <h4 id='ui-sub-title'>🦠 cellular:</h4>
+                            <h5 id='ui-text'>Instead of being a single unit, a model is made up of a bunch of individual <i>cells</i>.</h5>
+                            <h4 id='ui-sub-title'>🤖 automata:</h4>
+                            <h5 id='ui-text' style={{paddingBottom:'0.5em'}}>A model grows on its own by repeatedly applying steps <i>automatically</i> as if it were a living organism.</h5>
+                            
+                            <hr/>
+                            
+                            <h4 id='ui-title'>How does it work?</h4>
+                            <h5 id='ui-text'>What a great question! As previously mentioned, nca are made up of a bunch of <i>cells</i> (each little box you see is a single cell).</h5>
+                            <h5 id='ui-text'>Each step, every cell looks at its <i>neighboring</i> cells and decides what color and how transparent it should be. After enough steps, the model grows to become its target object!</h5>
+                            <h5 id='ui-text' style={{paddingBottom:'0.5em'}}>This is a gross simplification of how nca work. I wrote an entire +100 page thesis on the subject (available <a href='https://repositories.lib.utexas.edu/items/59d8a230-6f66-4cfe-90ae-1ee82c4842c7'><i>here</i></a>) if you are looking for a more comprehensive answer.</h5>
                         
-                        <hr/>
-                        
-                        <h4 id='ui-title'>How does it work?</h4>
-                        <h5 id='ui-text'>What a great question! As previously mentioned, nca are made up of a bunch of <i>cells</i> (each little box you see is a single cell).</h5>
-                        <h5 id='ui-text'>Each step, every cell looks at its <i>neighboring</i> cells and decides what color and how transparent it should be. After enough steps, the model grows to become its target object!</h5>
-                        <h5 id='ui-text' style={{paddingBottom:'0.5em'}}>This is a gross simplification of how nca work. I wrote an entire +100 page thesis on the subject (available <a href='https://repositories.lib.utexas.edu/items/59d8a230-6f66-4cfe-90ae-1ee82c4842c7'><i>here</i></a>) if you are looking for a more comprehensive answer.</h5>
-                    
-                        <hr/>
+                            <hr/>
 
-                        <h4 id='ui-title'>Are there more?</h4>
-                        <h5 id='ui-text'>Sure! Click on the <big>⚙️</big> button at the top-right of the window to open up the control panel. You can change the model using the drop-down labeled <i>select model</i>.</h5>
-                        <h5 id='ui-text' style={{paddingBottom:'4em'}}>You can also close this panel by clicking the <big>🤔</big> button at the top-right of this panel.</h5>
+                            <h4 id='ui-title'>Are there more?</h4>
+                            <h5 id='ui-text'>Sure! Click on the <big>⚙️</big> button at the top-right of the window to open up the control panel. You can change the model using the drop-down labeled <i>select model</i>.</h5>
+                            <h5 id='ui-text' style={{paddingBottom:'4em'}}>You can also close this panel by clicking the <big>🤔</big> button at the top-right of this panel.</h5>
 
-                        <a href='https://marcoravelo.com/continuous-cellular-automata/' className='a_button'>🚀 Visit CCA App</a>
+                            <a href='https://marcoravelo.com/continuous-cellular-automata/' className='a_button'>🚀 Visit CCA App</a>
 
-                        <div style={{height:'4em'}}/>
+                            <div style={{height:'4em'}}/>
+                        </div>
                     </div>
 
                     <button id='sidebar-left-button' className={!this.sidebar_left_open ? 'ui_button closed': 'ui_button'} onClick={this.toggle_sidebar_left}>🤔</button>
