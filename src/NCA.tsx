@@ -127,7 +127,7 @@ export class NCA
         this.convert_to_rgba()
         this.current_worker = model
         this.worker = new Worker(new URL('./NCAWorker.ts', import.meta.url), { type: 'module' })
-        console.log(`[NCA.tsx] loaded new model: ${model}`)
+        // console.log(`[NCA.tsx] loaded new model: ${model}`)
         this.worker.postMessage({ type: 'init', data: [this.model] })
         this.worker.onmessage = (event) => {
             if (event.data.type === 'init-complete') {
@@ -154,7 +154,7 @@ export class NCA
         if (this.apply_damage_next) {
             this.apply_damage_next = false
             worker_cmd = 'dmg'
-            console.log(`[NCA.tsx] applying cellular damage`)
+            // console.log(`[NCA.tsx] applying cellular damage`)
         }
 
         // * send current state to worker

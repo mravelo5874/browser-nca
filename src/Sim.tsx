@@ -23,8 +23,7 @@ export class Sim {
     // * core simulation components
     ui: UI | null = null
     nca: NCA
-    step: number = 0
-    prev_step: number = 0
+    steps: number = 0
     paused: boolean
     bg: Vec4
     is_hidden: boolean = false
@@ -54,12 +53,11 @@ export class Sim {
 
     // * auto restart feature
     auto_restart: boolean = true
-    auto_restart_steps: number = 500
+    auto_restart_threshold: number = 500
 
     // * auto apply damage feature
     auto_damage: boolean = true
-    auto_damage_steps: number = 100
-    auto_damage_count: number = 0
+    auto_damage_threshold: number = 100
 
     // * calculate time and fps
     fps: number = 0.0
@@ -74,8 +72,10 @@ export class Sim {
     //      fps is at or below threshold for set duration
     perfomance_mode: boolean = false
     low_fps_tracker: number = 0.0
-    static low_fps_duration: number = 3000
+    high_fps_tracker: number = 0.0
+    static fps_check_duration: number = 3000
     static low_fps_threshold: number = 20
+    static high_fps_threshold: number = 100
 
     constructor() {
         this.key_down = {}
@@ -88,7 +88,7 @@ export class Sim {
         this.light_radius = 8.0
 
         this.nca = new NCA()
-        this.nca.load_model_worker('oak')
+        this.nca.load_model_worker('minicube')
         console.log('[Sim.tsx] simulation constructed')
     }
 
@@ -198,9 +198,31 @@ export class Sim {
             }
             
             // * detected low fps for sufficient duration
-            if (this.low_fps_tracker >= Sim.low_fps_duration) {
+            if (this.low_fps_tracker >= Sim.fps_check_duration) {
                 this.perfomance_mode = true
+                this.low_fps_tracker = 0.0
                 console.log('[Sim.tsx] detected low fps -- entering performace mode')
+                this.ui?.render()
+            }
+        }
+
+        // * exit performance mode if fps is > 100
+        else if (!this.is_hidden) {
+            // * check high fps threshold
+            if (this.fps >= Sim.high_fps_threshold && this.fps !== 0) {
+                this.high_fps_tracker += this.curr_delta_time
+            }
+            // * otherwise reset tracker
+            else {
+                this.high_fps_tracker = 0.0
+            }
+            
+            // * detected high fps for sufficient duration
+            if (this.high_fps_tracker >= Sim.fps_check_duration) {
+                this.perfomance_mode = false
+                this.high_fps_tracker = 0.0
+                console.log('[Sim.tsx] detected high fps -- exiting performace mode')
+                this.ui?.render()
             }
         }
         
@@ -221,30 +243,31 @@ export class Sim {
         // * auto restart calculation
         let reset = false
         if (this.auto_restart) {
-            if (this.auto_restart_steps <= this.nca.get_worker_steps()) {
+            if (this.auto_restart_threshold <= this.nca.get_worker_steps()) {
                 reset = true
-                this.auto_damage_count = 0
             }
         }
 
         // * reset model ELSE update model
         if (this.get_key('KeyR') || reset) {
             this.nca.reset()
-            this.step = 0
-            this.prev_step = 0
         }
         else {
             this.nca.update()
-            this.prev_step = this.step
-            this.step = this.nca.get_worker_steps()
+        }
+        this.steps = this.nca.get_worker_steps()
+
+        // * DEV: manually enter performance mode
+        if (this.get_key('ControlLeft') && this.get_key('ShiftLeft')) {
+            if (!this.perfomance_mode) {
+                console.log('[Sim.tsx] manually enterning performace mode')
+                this.perfomance_mode = true
+            }
         }
 
         // * auto damage calculation
         if (this.auto_damage) {
-            const delta_step = this.step - this.prev_step
-            this.auto_damage_count += delta_step
-            if (this.auto_damage_count >= this.auto_damage_steps) {
-                this.auto_damage_count = 0
+            if (this.steps !== 0 && this.steps % this.auto_damage_threshold === 0) {
                 this.nca.apply_damage()
             }
         }

@@ -39,6 +39,7 @@ export class UI extends React.Component<UIInterface, {}> {
         this.change_light_color = this.change_light_color.bind(this)
         this.change_light_speed = this.change_light_speed.bind(this)
         this.change_light_radius = this.change_light_radius.bind(this)
+        this.exit_performance_mode = this.exit_performance_mode.bind(this)
 
         console.log('[UI.tsx] ui constructed')
     }
@@ -94,7 +95,7 @@ export class UI extends React.Component<UIInterface, {}> {
             this.step_node.nodeValue = ''
         }
         else {
-            this.step_node.nodeValue = this.props.sim.step.toFixed(0)
+            this.step_node.nodeValue = this.props.sim.steps.toFixed(0)
         }
     }
 
@@ -161,6 +162,10 @@ export class UI extends React.Component<UIInterface, {}> {
         sim.set_light_radius(+val)
     }
 
+    exit_performance_mode() {
+
+    }
+
     render() {
         return(
             <>
@@ -216,12 +221,20 @@ export class UI extends React.Component<UIInterface, {}> {
                             <h4 style={{fontSize:'1em', paddingLeft:'0.5em'}}>paused</h4>
                         </div>
 
+                        {/* <button id='exit-performance-mode' style={{
+                            scale: this.props.sim.perfomance_mode ? '100%' : '0%',
+                            height: this.props.sim.perfomance_mode ? '-100%' : '0%',
+                            paddingTop: this.props.sim.perfomance_mode ? '0.5em' : '0em',
+                            paddingBottom: this.props.sim.perfomance_mode ? '0.5em' : '0em',
+                        }} className={'ui_button'} onClick={this.exit_performance_mode}>exit performance mode</button> */}
+
                         <hr/>
 
                         <div style={{paddingBottom:'0.5em', paddingRight:'0.5em'}}>
                             <h4 style={{paddingBottom:'0.5em'}}>select a model:</h4>
                             <select className='dropdown_input' name='load_model_dropdown' id='load_model_dropdown' onChange={this.load_model}>
-                                <option className='dropdown_option' value='oak'>🌳 oak</option>
+                                <option className='dropdown_option' value='minicube'>◻️ minicube</option>
+                                <option value='oak'>🌳 oak</option>
                                 <option value='sphere'>🔵 sphere</option>
                                 <option value='rubiks'>🧊 rubiks</option>
                                 <option value='burger'>🍔 burger</option>
@@ -229,7 +242,7 @@ export class UI extends React.Component<UIInterface, {}> {
                                 <option value='earth'>🌍 earth</option>
                                 <option value='cactus'>🌵 cactus</option>
                                 <option value='maze'>🕹️ maze</option>
-                                <option value='minicube'>◻️ minicube</option>
+                                
                             </select>
 
                             <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0.5em'}}>
