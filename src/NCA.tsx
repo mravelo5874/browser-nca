@@ -14,6 +14,7 @@ export class NCA
     private worker_steps: number = 0
     private rgba: Uint8Array | null = null
     private apply_damage_next: boolean = false
+    private paused: boolean = false
 
     constructor () { 
         this.worker_ready = false
@@ -29,6 +30,10 @@ export class NCA
         if (this.worker_running) return
         this.worker_running = true
         this.worker_loop()
+    }
+
+    public toggle_paused() {
+        this.paused = !this.paused
     }
 
     public reset() {
@@ -135,6 +140,13 @@ export class NCA
     private async worker_loop() {
         if (!this.worker) return
         if (!this.worker_running) return
+
+        if (this.paused) {
+            setTimeout(() => {
+                this.worker_loop()
+            }, 100)
+            return
+        }
 
         let worker_cmd = 'run'
 

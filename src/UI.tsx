@@ -35,6 +35,7 @@ export class UI extends React.Component<UIInterface, {}> {
         this.toggle_sidebar_right = this.toggle_sidebar_right.bind(this)
         this.toggle_auto_reset = this.toggle_auto_reset.bind(this)
         this.toggle_auto_damage = this.toggle_auto_damage.bind(this)
+        this.toggle_nca_paused = this.toggle_nca_paused.bind(this)
         this.change_light_color = this.change_light_color.bind(this)
         this.change_light_speed = this.change_light_speed.bind(this)
         this.change_light_radius = this.change_light_radius.bind(this)
@@ -124,6 +125,11 @@ export class UI extends React.Component<UIInterface, {}> {
         sim.load_model(value)
     }
 
+    toggle_nca_paused() {
+        let sim = this.props.sim
+        sim.toggle_nca_paused()
+    }
+
     toggle_auto_reset() {
         let sim = this.props.sim
         sim.toggle_auto_reset()
@@ -204,6 +210,11 @@ export class UI extends React.Component<UIInterface, {}> {
                         <h4 style={{fontSize:'1em'}}>res: <span id='res'/></h4>
                         <h4 style={{fontSize:'1em'}}>fps: <span id='fps'/></h4>
                         <h4 style={{fontSize:'1em'}}>step: <span id='step'/></h4>
+
+                        <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0.5em'}}>
+                            <input type='checkbox' id='toggle-nca-paused' onClick={this.toggle_nca_paused}/>
+                            <h4 style={{fontSize:'1em', paddingLeft:'0.5em'}}>paused</h4>
+                        </div>
 
                         <hr/>
 

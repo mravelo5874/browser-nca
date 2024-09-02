@@ -107,6 +107,10 @@ export class Sim {
         window.requestAnimationFrame(() => this.render_loop())
         console.log('[Sim.tsx] simulation started')
     }
+    
+    public toggle_nca_paused() {
+        this.nca.toggle_paused()
+    }
 
     public toggle_auto_reset() {
         this.auto_restart = !this.auto_restart
