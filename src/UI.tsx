@@ -35,8 +35,9 @@ export class UI extends React.Component<UIInterface, {}> {
         this.toggle_sidebar_right = this.toggle_sidebar_right.bind(this)
         this.toggle_auto_reset = this.toggle_auto_reset.bind(this)
         this.toggle_auto_damage = this.toggle_auto_damage.bind(this)
-        this.change_ground_color = this.change_ground_color.bind(this)
+        this.change_light_color = this.change_light_color.bind(this)
         this.change_light_speed = this.change_light_speed.bind(this)
+        this.change_light_radius = this.change_light_radius.bind(this)
 
         console.log('[UI.tsx] ui constructed')
     }
@@ -45,6 +46,14 @@ export class UI extends React.Component<UIInterface, {}> {
         // * open the left sidebar after 1 second
         if (!this.comp_mounted) {
             this.comp_mounted = true
+            // * set default values for inputs
+            let lightColor = document.getElementById('light-color-picker') as HTMLInputElement
+            lightColor.defaultValue = '#19334d'
+            let lightslider = document.getElementById('light-speed-slider') as HTMLInputElement
+            lightslider.defaultValue ='0.1'
+            let lightradius = document.getElementById('light-radius-slider') as HTMLInputElement
+            lightradius.defaultValue ='8.0'
+            // * open left sidebar after 1 second
             setTimeout(() => {
                 this.toggle_sidebar_left()
                 this.forceUpdate()
@@ -125,11 +134,11 @@ export class UI extends React.Component<UIInterface, {}> {
         sim.toggle_auto_damage()
     }
 
-    change_ground_color() {
-        var colorpicker = document.getElementById('ground-color-picker') as HTMLInputElement
+    change_light_color() {
+        var colorpicker = document.getElementById('light-color-picker') as HTMLInputElement
         const color = colorpicker.value
         let sim = this.props.sim
-        sim.set_ground_color(color)
+        sim.set_light_color(color)
     }
 
     change_light_speed() {
@@ -137,6 +146,13 @@ export class UI extends React.Component<UIInterface, {}> {
         const val = lightslider.value
         let sim = this.props.sim
         sim.set_light_speed(+val)
+    }
+
+    change_light_radius() {
+        var lightslider = document.getElementById('light-radius-slider') as HTMLInputElement
+        const val = lightslider.value
+        let sim = this.props.sim
+        sim.set_light_radius(+val)
     }
 
     render() {
@@ -192,7 +208,7 @@ export class UI extends React.Component<UIInterface, {}> {
                         <hr/>
 
                         <div style={{paddingBottom:'0.5em', paddingRight:'0.5em'}}>
-                            <h4 style={{paddingBottom:'0.5em'}}>select model:</h4>
+                            <h4 style={{paddingBottom:'0.5em'}}>select a model:</h4>
                             <select className='dropdown_input' name='load_model_dropdown' id='load_model_dropdown' onChange={this.load_model}>
                                 <option className='dropdown_option' value='oak'>🌳 oak</option>
                                 <option value='sphere'>🔵 sphere</option>
@@ -218,16 +234,21 @@ export class UI extends React.Component<UIInterface, {}> {
 
                         <hr/>
 
-                        <h4 style={{fontSize:'1em'}}>Light & Color</h4>
+                        <h4 style={{fontSize:'1em'}}>light controls</h4>
                         <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0.5em'}}>
-                            <input type='color' id='ground-color-picker' value='#19334d' onChange={this.change_ground_color}/>
-                            <h4 style={{fontSize:'1em', paddingLeft:'0.5em'}}>ground color</h4>
+                            <input type='color' id='light-color-picker' onChange={this.change_light_color}/>
+                            <h4 style={{fontSize:'1em', paddingLeft:'0.5em'}}>light color</h4>
                         </div>
 
-                        {/* <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0.5em'}}>
-                            <input type='range' id='light-speed-slider' min='0.0' max='50.0' step='1.0' onChange={this.change_light_speed}/>
+                        <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0.5em'}}>
+                            <input type='range' id='light-speed-slider' min='0.0' max='1.0' step='0.1' onChange={this.change_light_speed}/>
                             <h4 style={{fontSize:'1em', paddingLeft:'0.5em'}}>light speed</h4>
-                        </div> */}
+                        </div>
+
+                        <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0.5em'}}>
+                            <input type='range' id='light-radius-slider' min='4.0' max='24.0' step='0.1' onChange={this.change_light_radius}/>
+                            <h4 style={{fontSize:'1em', paddingLeft:'0.5em'}}>light radius</h4>
+                        </div>
                         
                     </div>
                     <button id='sidebar-right-button' className={'ui_button closed'} onClick={this.toggle_sidebar_right}>⚙️</button>

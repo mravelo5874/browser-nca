@@ -130,7 +130,6 @@ export class NCA
                 // console.log('[NCA -- load_model] worker is ready!')
             }
         }
-  
     }
 
     private async worker_loop() {

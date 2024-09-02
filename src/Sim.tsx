@@ -1,5 +1,6 @@
 import { UI } from './UI'
 import { NCA } from './NCA'
+import { Light } from './Light'
 import { webgl_util } from './WebGL_Util'
 import { CanvasResize } from './CanvasResize'
 import { Camera, Vec2, Vec3, Vec4 } from './lib/rary'
@@ -35,8 +36,7 @@ export class Sim {
     use_postprocess: boolean = true
 
     // * light components
-    light_speed: number = 1.0
-    light_pos: Vec3
+    light: Light
     light_radius: number
     light_color_mult: Vec4
     
@@ -83,8 +83,8 @@ export class Sim {
         this.paused = false
         this.bg = new Vec4([0.0, 0.0, 0.0, 1.0])
 
+        this.light = new Light()
         this.light_color_mult = new Vec4([0.1, 0.2, 0.3, 1.0])
-        this.light_pos = new Vec3([2, 2, 2])
         this.light_radius = 8.0
 
         this.nca = new NCA()
@@ -126,14 +126,18 @@ export class Sim {
     }
 
     public set_light_speed(val: number) {
-        this.light_speed = val
+        this.light.set_speed(val)
+    }
+    
+    public set_light_radius(val: number) {
+        this.light_radius = val
     }
 
     public set_hidden(val: boolean) {
         this.is_hidden = val
     }
 
-    public set_ground_color(color: string) {
+    public set_light_color(color: string) {
         this.light_color_mult = convert_hexcolor_to_rgba(color)
     }
 
@@ -208,8 +212,7 @@ export class Sim {
         }
 
         // * move light source
-        let light_vel = 0.00005 * this.light_speed
-        this.light_pos = new Vec3([Math.sin(curr_time*light_vel)*2, 2, Math.cos(curr_time*light_vel)*2])
+        this.light.update(this.curr_delta_time / 1000)
 
         // * auto restart calculation
         let reset = false
@@ -260,13 +263,13 @@ export class Sim {
 
         // * nca data available
         if (this.nca_texture) {
-            this.rendershadow?.render(w, h, camera, this.bg, this.light_pos, this.light_radius, this.light_color_mult, this.nca_texture)
+            this.rendershadow?.render(w, h, camera, this.bg, this.light.light_pos, this.light_radius, this.light_color_mult, this.nca_texture)
             if (this.use_postprocess && !this.perfomance_mode) this.postprocess?.render(w, h, 4.0, this.canvas!)
-            this.rendercube?.render(w, h, camera, this.light_pos, this.perfomance_mode, this.nca_texture)
+            this.rendercube?.render(w, h, camera, this.light.light_pos, this.perfomance_mode, this.nca_texture)
 
         // * no nca data
         } else {
-            this.rendershadow?.render(w, h, camera, this.bg, this.light_pos, this.light_radius, this.light_color_mult)
+            this.rendershadow?.render(w, h, camera, this.bg, this.light.light_pos, this.light_radius, this.light_color_mult)
         }
     }
 
