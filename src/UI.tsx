@@ -54,7 +54,7 @@ export class UI extends React.Component<UIInterface, {}> {
             let lightslider = document.getElementById('light-speed-slider') as HTMLInputElement
             lightslider.defaultValue ='0.1'
             let lightradius = document.getElementById('light-radius-slider') as HTMLInputElement
-            lightradius.defaultValue ='8.0'
+            lightradius.defaultValue ='5.0'
             // * open left sidebar after 1 second
             setTimeout(() => {
                 this.toggle_sidebar_left()
@@ -172,53 +172,72 @@ export class UI extends React.Component<UIInterface, {}> {
                 <div id='sidebar-left' className={!this.sidebar_left_open ? 'closed': ''}>
                     <div id='sidebar-left-panel' className={!this.sidebar_left_open ? 'closed': ''}>
                         <div id='sidebar-left-inside'>
+                            <div style={{height:'1em'}}/>
+                        
                             <h4 id='ui-title'>What am I looking at?</h4>
-                            <h5 id='ui-text'>You are looking at a <i>neural cellular automaton</i> (nca for short). More specifically, you are seeing an nca model growing into its target object (an oak tree!).</h5>
-                            <h5 id='ui-text'>Lets break down each word in nca:</h5>
-                            <h4 id='ui-sub-title'>🧠 neural:</h4>
-                            <h5 id='ui-text'>The underlying mechanism powering the model is a trained <i>neural network</i>.</h5>
-                            <h4 id='ui-sub-title'>🦠 cellular:</h4>
-                            <h5 id='ui-text'>Instead of being a single unit, a model is made up of a bunch of individual <i>cells</i>.</h5>
-                            <h4 id='ui-sub-title'>🤖 automata:</h4>
+                            <h5 id='ui-text'>You are looking at a <i>neural cellular automaton</i> (nca for short). More specifically, you are seeing an nca model growing into its target structure (an oak tree!). To get a better understanding, let's break down each word in nca:</h5>
+                            <h4 id='ui-sub-title'><big>🧠</big> neural:</h4>
+                            <h5 id='ui-text'>The underlying mechanism powering the nca model is a trained <i>neural network</i>.</h5>
+                            <h4 id='ui-sub-title'><big>🦠</big> cellular:</h4>
+                            <h5 id='ui-text'>Instead of consisting of a single unit, a model is made up of a bunch of individual <i>cells</i>.</h5>
+                            <h4 id='ui-sub-title'><big>🤖</big> automata:</h4>
                             <h5 id='ui-text' style={{paddingBottom:'0.5em'}}>A model grows on its own by repeatedly applying steps <i>automatically</i> as if it were a living organism.</h5>
                             
+                            <div style={{height:'1em'}}/>
                             <hr/>
+                            <div style={{height:'1em'}}/>
                             
-                            <h4 id='ui-title'>How does it work?</h4>
+                            <h4 id='ui-title'>How do they work?</h4>
                             <h5 id='ui-text'>As previously mentioned, nca are made up of a bunch of <i>cells</i> (each little box you see is a single cell).</h5>
-                            <h5 id='ui-text'>Each step, every cell looks at its <i>neighboring</i> cells and decides what color and how transparent it should be. After enough steps, the model grows to become its target object!</h5>
+                            <h5 id='ui-text'>Each step, every cell looks at its <i>neighboring</i> cells and decides what color and how transparent it should be. After enough steps, the model grows to become its target structure!</h5>
                             <h5 id='ui-text' style={{paddingBottom:'0.5em'}}>This is a gross simplification of how nca work. I wrote an entire +100 page thesis on the subject (available <a href='https://repositories.lib.utexas.edu/items/59d8a230-6f66-4cfe-90ae-1ee82c4842c7'><i>here</i></a>) if you are looking for a more comprehensive answer.</h5>
                         
+                            <div style={{height:'1em'}}/>
                             <hr/>
+                            <div style={{height:'1em'}}/>
+
+                            <h4 id='ui-title'>What properties do they have?</h4>
+                            <h5 id='ui-text'>These nca models have various properties that make them unique to other cellular automata-based models. Here are the three most prominent ones:</h5>
+                            <h4 id='ui-sub-title'><big>🗃️</big> self-organizing:</h4>
+                            <h5 id='ui-text'>The individual cells in an nca model are able to <i>organize</i> into a global structure via interactions amongst themselves rather than through external instruction.</h5>
+                            <h4 id='ui-sub-title'><big>🦎</big> regenerative:</h4>
+                            <h5 id='ui-text'>After cellular damage is applied, nca models are able to <i>regenerate</i> lost structures and features. By default, cellular damage is applied (a random half of the model's volume get erased) every 100 steps.</h5>
+                            <h4 id='ui-sub-title'><big>🔄</big> isotropic:</h4>
+                            <h5 id='ui-text' style={{paddingBottom:'0.5em'}}>Models trained with specific perception types are able to grow in any direction, a property known as <i>isotropism</i>. For more details on this, refer to the thesis (available <a href='https://repositories.lib.utexas.edu/items/59d8a230-6f66-4cfe-90ae-1ee82c4842c7'><i>here</i></a>).</h5>
+
+                            <div style={{height:'1em'}}/>
+                            <hr/>
+                            <div style={{height:'1em'}}/>
 
                             <h4 id='ui-title'>Are there more?</h4>
-                            <h5 id='ui-text'>Sure! Click on the <big>⚙️</big> button at the top-right of the window to open up the control panel. You can change the model using the drop-down labeled <i>select model</i>.</h5>
-                            <h5 id='ui-text' style={{paddingBottom:'4em'}}>You can also close this panel by clicking the <big>🤔</big> button at the top-right of this panel.</h5>
-
-                            <a href='https://marcoravelo.com/continuous-cellular-automata/' className='a_button'>🚀 Visit CCA App</a>
+                            <h5 id='ui-text'>Sure! Click on the <big>⚙️</big> button at the top-right of the window to open up the control panel. You can change the model using the drop-down labeled <i>select a model</i>.</h5>
+                            <h5 id='ui-text'>You can also close this panel by clicking the <big>🤔</big> button at the top-right of this panel.</h5>
 
                             <div style={{height:'4em'}}/>
                         </div>
                     </div>
 
-                    <button id='sidebar-left-button' className={!this.sidebar_left_open ? 'ui_button closed': 'ui_button'} onClick={this.toggle_sidebar_left}>🤔</button>
+                    <button id='sidebar-left-button' className={!this.sidebar_left_open ? 'ui_button closed': 'ui_button'} onClick={this.toggle_sidebar_left}><big>🤔</big></button>
                 </div> 
 
                 <div id='sidebar-right' className='closed'>
                     <div id='sidebar-right-panel' className='closed'>
+                        <div style={{height:'1em'}}/>
                         <h4 style={{fontSize:'1em'}}>This is the control panel.</h4>
                         <h5 id='ui-text' style={{paddingTop:'0.5em'}}>⚠️ This app is still under development!</h5>
-                        <h5 id='ui-text' style={{paddingTop:'0.5em'}}>Come back soon to see new features!</h5>
+                        <h5 id='ui-text'>Come back soon to see new features!</h5>
 
+                        <div style={{height:'0.5em'}}/>
                         <hr/>
+                        <div style={{height:'0.5em'}}/>
 
-                        <h4 style={{fontSize:'1em'}}>res: <span id='res'/></h4>
-                        <h4 style={{fontSize:'1em'}}>fps: <span id='fps'/></h4>
-                        <h4 style={{fontSize:'1em'}}>step: <span id='step'/></h4>
+                        <h4 style={{fontSize:'1em'}}>res: <span style={{color:'#c8c8c8'}} id='res'/></h4>
+                        <h4 style={{fontSize:'1em'}}>fps: <span style={{color:'#c8c8c8'}} id='fps'/></h4>
+                        <h4 style={{fontSize:'1em'}}>step: <span style={{color:'#c8c8c8'}} id='step'/></h4>
 
                         <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0.5em'}}>
                             <input type='checkbox' id='toggle-nca-paused' onClick={this.toggle_nca_paused}/>
-                            <h4 style={{fontSize:'1em', paddingLeft:'0.5em'}}>paused</h4>
+                            <h5 id='ui-text' style={{paddingLeft:'0.5em', marginBlockEnd:'0em'}}>paused</h5>
                         </div>
 
                         {/* <button id='exit-performance-mode' style={{
@@ -228,13 +247,16 @@ export class UI extends React.Component<UIInterface, {}> {
                             paddingBottom: this.props.sim.perfomance_mode ? '0.5em' : '0em',
                         }} className={'ui_button'} onClick={this.exit_performance_mode}>exit performance mode</button> */}
 
+                        <div style={{height:'0.5em'}}/>
                         <hr/>
+                        <div style={{height:'0.5em'}}/>
 
                         <div style={{paddingBottom:'0.5em', paddingRight:'0.5em'}}>
-                            <h4 style={{paddingBottom:'0.5em'}}>select a model:</h4>
+                            <h4 id='ui-title'>Model Controls</h4>
+                            <h5 id='ui-text' style={{paddingBottom:'0.2em'}}>select a model:</h5>
                             <select className='dropdown_input' name='load_model_dropdown' id='load_model_dropdown' onChange={this.load_model}>
-                                <option className='dropdown_option' value='minicube'>◻️ minicube</option>
-                                <option value='oak'>🌳 oak</option>
+                                <option value='oak' className='dropdown_option'>🌳 oak</option>
+                                <option value='minicube'>◻️ minicube</option>
                                 <option value='sphere'>🔵 sphere</option>
                                 <option value='rubiks'>🧊 rubiks</option>
                                 <option value='burger'>🍔 burger</option>
@@ -247,35 +269,51 @@ export class UI extends React.Component<UIInterface, {}> {
 
                             <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0.5em'}}>
                                 <input type='checkbox' id='toggle-auto-reset' onClick={this.toggle_auto_reset} defaultChecked/>
-                                <h4 style={{fontSize:'1em', paddingLeft:'0.5em'}}>auto reset (after 500 steps)</h4>
+                                <h5 id='ui-text' style={{paddingLeft:'0.5em', marginBlockEnd:'0em'}}>auto reset (after 500 steps)</h5>
                             </div>
 
                             <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0em'}}>
                                 <input type='checkbox' id='toggle-auto-reset' onClick={this.toggle_auto_damage} defaultChecked/>
-                                <h4 style={{fontSize:'1em', paddingLeft:'0.5em'}}>auto damage (every 100 steps)</h4>
+                                <h5 id='ui-text' style={{paddingLeft:'0.5em', marginBlockEnd:'0em'}}>auto damage (every 100 steps)</h5>
                             </div>
                         </div>
 
+                        <div style={{height:'0.5em'}}/>
                         <hr/>
+                        <div style={{height:'0.5em'}}/>
 
-                        <h4 style={{fontSize:'1em'}}>light controls</h4>
+                        <h4 id='ui-title'>Light Controls</h4>
                         <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0.5em'}}>
                             <input type='color' id='light-color-picker' onChange={this.change_light_color}/>
-                            <h4 style={{fontSize:'1em', paddingLeft:'0.5em'}}>light color</h4>
+                            <h5 id='ui-text' style={{paddingLeft:'0.5em'}}>light color</h5>
                         </div>
 
                         <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0.5em'}}>
                             <input type='range' id='light-speed-slider' min='0.0' max='1.0' step='0.1' onChange={this.change_light_speed}/>
-                            <h4 style={{fontSize:'1em', paddingLeft:'0.5em'}}>light speed</h4>
+                            <h5 id='ui-text' style={{paddingLeft:'0.5em', marginBlockEnd:'0em'}}>light speed</h5>
                         </div>
 
                         <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0.5em'}}>
-                            <input type='range' id='light-radius-slider' min='4.0' max='24.0' step='0.1' onChange={this.change_light_radius}/>
-                            <h4 style={{fontSize:'1em', paddingLeft:'0.5em'}}>light radius</h4>
+                            <input type='range' id='light-radius-slider' min='0.0' max='24.0' step='0.1' onChange={this.change_light_radius}/>
+                            <h5 id='ui-text' style={{paddingLeft:'0.5em', marginBlockEnd:'0em'}}>light radius</h5>
                         </div>
-                        
+
+                        <div style={{height:'0.5em'}}/>
+                        <hr/>
+                        <div style={{height:'0.5em'}}/>
+
+                        <h4 id='ui-title'>Links</h4>
+                        <a href='https://marcoravelo.com/continuous-cellular-automata/' className='a_button'><big>🚀</big> Visit CCA App</a>
+                        <div style={{height:'1.5em'}}/>
+                        <a href='https://repositories.lib.utexas.edu/items/59d8a230-6f66-4cfe-90ae-1ee82c4842c7/' className='a_button'><big>📚</big> View NCA Thesis</a>
+                        <div style={{height:'1.5em'}}/>
+                        <a href='https://github.com/mravelo5874/neural-cellular-automata/' className='a_button'><big>👨‍💻</big> NCA Github Repo</a>
+                        <div style={{height:'1.5em'}}/>
+                        <a href='https://github.com/mravelo5874/browser-nca/' className='a_button'><big>💻</big> Website Github Repo</a>
+
+                        <div style={{height:'4em'}}/>
                     </div>
-                    <button id='sidebar-right-button' className={'ui_button closed'} onClick={this.toggle_sidebar_right}>⚙️</button>
+                    <button id='sidebar-right-button' className={'ui_button closed'} onClick={this.toggle_sidebar_right}><big>⚙️</big></button>
                 </div> 
             </>
         )

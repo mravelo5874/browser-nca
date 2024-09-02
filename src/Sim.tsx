@@ -85,10 +85,10 @@ export class Sim {
 
         this.light = new Light()
         this.light_color_mult = new Vec4([0.1, 0.2, 0.3, 1.0])
-        this.light_radius = 8.0
+        this.light_radius = 5.0
 
         this.nca = new NCA()
-        this.nca.load_model_worker('minicube')
+        this.nca.load_model_worker('oak')
         console.log('[Sim.tsx] simulation constructed')
     }
 
