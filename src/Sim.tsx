@@ -112,6 +112,10 @@ export class Sim {
         this.auto_restart = !this.auto_restart
     }
 
+    public toggle_auto_damage() {
+        this.auto_damage = !this.auto_damage
+    }
+
     public load_model(model: string) {
         this.nca.load_model_worker(model)
     }
@@ -212,6 +216,7 @@ export class Sim {
         if (this.auto_restart) {
             if (this.auto_restart_steps <= this.nca.get_worker_steps()) {
                 reset = true
+                this.auto_damage_count = 0
             }
         }
 

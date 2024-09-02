@@ -143,6 +143,7 @@ export class NCA
         if (this.apply_damage_next) {
             this.apply_damage_next = false
             worker_cmd = 'dmg'
+            console.log(`[NCA.tsx] applying cellular damage`)
         }
 
         // * send current state to worker

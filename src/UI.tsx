@@ -34,6 +34,7 @@ export class UI extends React.Component<UIInterface, {}> {
         this.toggle_sidebar_left = this.toggle_sidebar_left.bind(this)
         this.toggle_sidebar_right = this.toggle_sidebar_right.bind(this)
         this.toggle_auto_reset = this.toggle_auto_reset.bind(this)
+        this.toggle_auto_damage = this.toggle_auto_damage.bind(this)
         this.change_ground_color = this.change_ground_color.bind(this)
         this.change_light_speed = this.change_light_speed.bind(this)
 
@@ -119,6 +120,11 @@ export class UI extends React.Component<UIInterface, {}> {
         sim.toggle_auto_reset()
     }
 
+    toggle_auto_damage() {
+        let sim = this.props.sim
+        sim.toggle_auto_damage()
+    }
+
     change_ground_color() {
         var colorpicker = document.getElementById('ground-color-picker') as HTMLInputElement
         const color = colorpicker.value
@@ -152,7 +158,7 @@ export class UI extends React.Component<UIInterface, {}> {
                             <hr/>
                             
                             <h4 id='ui-title'>How does it work?</h4>
-                            <h5 id='ui-text'>What a great question! As previously mentioned, nca are made up of a bunch of <i>cells</i> (each little box you see is a single cell).</h5>
+                            <h5 id='ui-text'>As previously mentioned, nca are made up of a bunch of <i>cells</i> (each little box you see is a single cell).</h5>
                             <h5 id='ui-text'>Each step, every cell looks at its <i>neighboring</i> cells and decides what color and how transparent it should be. After enough steps, the model grows to become its target object!</h5>
                             <h5 id='ui-text' style={{paddingBottom:'0.5em'}}>This is a gross simplification of how nca work. I wrote an entire +100 page thesis on the subject (available <a href='https://repositories.lib.utexas.edu/items/59d8a230-6f66-4cfe-90ae-1ee82c4842c7'><i>here</i></a>) if you are looking for a more comprehensive answer.</h5>
                         
@@ -202,6 +208,11 @@ export class UI extends React.Component<UIInterface, {}> {
                             <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0.5em'}}>
                                 <input type='checkbox' id='toggle-auto-reset' onClick={this.toggle_auto_reset} defaultChecked/>
                                 <h4 style={{fontSize:'1em', paddingLeft:'0.5em'}}>auto reset (after 500 steps)</h4>
+                            </div>
+
+                            <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0em'}}>
+                                <input type='checkbox' id='toggle-auto-reset' onClick={this.toggle_auto_damage} defaultChecked/>
+                                <h4 style={{fontSize:'1em', paddingLeft:'0.5em'}}>auto damage (every 100 steps)</h4>
                             </div>
                         </div>
 
