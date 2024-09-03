@@ -71,6 +71,7 @@ export class Sim {
     //      app automatically enters performace mode if
     //      fps is at or below threshold for set duration
     perfomance_mode: boolean = false
+    force_on: boolean = false
     low_fps_tracker: number = 0.0
     high_fps_tracker: number = 0.0
     static fps_check_duration: number = 3000
@@ -145,6 +146,13 @@ export class Sim {
         this.light_color_mult = convert_hexcolor_to_rgba(color)
     }
 
+    public force_exit_performance_mode() {
+        this.perfomance_mode = false
+        this.force_on = true
+        this.ui?.forceUpdate()
+        console.log('[Sim.tsx] manually exited performace mode -- forcing')
+    }
+
     async setup_texture3d(rgba_data: Uint8Array, size: number) {
         let gl = this.context as WebGL2RenderingContext
         this.nca_texture = gl.createTexture() as WebGLTexture
@@ -186,7 +194,7 @@ export class Sim {
         }
 
         // * perfomance mode detection (while not hidden)
-        if (!this.perfomance_mode && !this.is_hidden) {
+        if (!this.perfomance_mode && !this.is_hidden && !this.force_on) {
 
             // * check low fps threshold
             if (this.fps <= Sim.low_fps_threshold && this.fps !== 0) {
@@ -201,13 +209,13 @@ export class Sim {
             if (this.low_fps_tracker >= Sim.fps_check_duration) {
                 this.perfomance_mode = true
                 this.low_fps_tracker = 0.0
+                this.ui?.forceUpdate()
                 console.log('[Sim.tsx] detected low fps -- entering performace mode')
-                this.ui?.render()
             }
         }
 
         // * exit performance mode if fps is > 100
-        else if (!this.is_hidden) {
+        else if (!this.is_hidden && !this.force_on) {
             // * check high fps threshold
             if (this.fps >= Sim.high_fps_threshold && this.fps !== 0) {
                 this.high_fps_tracker += this.curr_delta_time
@@ -221,8 +229,8 @@ export class Sim {
             if (this.high_fps_tracker >= Sim.fps_check_duration) {
                 this.perfomance_mode = false
                 this.high_fps_tracker = 0.0
+                this.ui?.forceUpdate()
                 console.log('[Sim.tsx] detected high fps -- exiting performace mode')
-                this.ui?.render()
             }
         }
         
@@ -260,8 +268,9 @@ export class Sim {
         // * DEV: manually enter performance mode
         if (this.get_key('ControlLeft') && this.get_key('ShiftLeft')) {
             if (!this.perfomance_mode) {
-                console.log('[Sim.tsx] manually enterning performace mode')
                 this.perfomance_mode = true
+                this.ui?.forceUpdate()
+                console.log('[Sim.tsx] manually enterning performace mode')
             }
         }
 

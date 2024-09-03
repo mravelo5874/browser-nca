@@ -1,0 +1,42 @@
+PS C:\Users\Marco\Documents\GitHub\browser-nca> npm run build
+
+> browser-nca@0.1.0 build
+> react-scripts build
+
+Creating an optimized production build...
+One of your dependencies, babel-preset-react-app, is importing the
+"@babel/plugin-proposal-private-property-in-object" package without
+declaring it in its dependencies. This is currently working because
+"@babel/plugin-proposal-private-property-in-object" is already in your
+node_modules folder for unrelated reasons, but it may break at any time.
+
+babel-preset-react-app is part of the create-react-app project, which
+is not maintianed anymore. It is thus unlikely that this bug will
+ever be fixed. Add "@babel/plugin-proposal-private-property-in-object" to
+your devDependencies to work around this error. This will make this message
+go away.
+
+Compiled with warnings.
+
+[eslint]
+src\lib\Cube.ts
+  Line 3:10:  'Cube' was used before it was defined  @typescript-eslint/no-use-before-define
+
+src\lib\Plane.ts
+  Line 3:10:  'Plane' was used before it was defined  @typescript-eslint/no-use-before-define
+
+Search for the keywords to learn more about each warning.
+To ignore, add // eslint-disable-next-line to the line before.
+
+File sizes after gzip:
+
+  183.33 kB (+177 B)  build\static\js\main.a966f3ff.js
+  107.1 kB            build\static\js\284.01e5d91a.chunk.js
+  1.47 kB             build\static\js\806.e09c2faa.chunk.js
+  891 B (+21 B)       build\static\css\main.f648d629.css
+
+The project was built assuming it is hosted at /.
+You can control this with the homepage field in your package.json.
+
+The build folder is ready to be deployed.
+You may serve it with a static server:

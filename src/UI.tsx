@@ -39,7 +39,7 @@ export class UI extends React.Component<UIInterface, {}> {
         this.change_light_color = this.change_light_color.bind(this)
         this.change_light_speed = this.change_light_speed.bind(this)
         this.change_light_radius = this.change_light_radius.bind(this)
-        this.exit_performance_mode = this.exit_performance_mode.bind(this)
+        this.force_exit_performance_mode = this.force_exit_performance_mode.bind(this)
 
         console.log('[UI.tsx] ui constructed')
     }
@@ -162,11 +162,13 @@ export class UI extends React.Component<UIInterface, {}> {
         sim.set_light_radius(+val)
     }
 
-    exit_performance_mode() {
-
+    force_exit_performance_mode() {
+        let sim = this.props.sim
+        sim.force_exit_performance_mode()
     }
 
     render() {
+        const performace_mode = this.props.sim.perfomance_mode
         return(
             <>
                 <div id='sidebar-left' className={!this.sidebar_left_open ? 'closed': ''}>
@@ -203,7 +205,7 @@ export class UI extends React.Component<UIInterface, {}> {
                             <h4 id='ui-sub-title'><big>🦎</big> regenerative:</h4>
                             <h5 id='ui-text'>After cellular damage is applied, nca models are able to <i>regenerate</i> lost structures and features. By default, cellular damage is applied (a random half of the model's volume get erased) every 100 steps.</h5>
                             <h4 id='ui-sub-title'><big>🔄</big> isotropic:</h4>
-                            <h5 id='ui-text' style={{paddingBottom:'0.5em'}}>Models trained with specific perception types are able to grow in any direction, a property known as <i>isotropism</i>. For more details on this, refer to the thesis (available <a href='https://repositories.lib.utexas.edu/items/59d8a230-6f66-4cfe-90ae-1ee82c4842c7'><i>here</i></a>).</h5>
+                            <h5 id='ui-text' style={{paddingBottom:'0.5em'}}>Models trained with specific perception types are able to grow in any direction, a property known as <i>isotropism</i>. For more details on this, please refer to the thesis (available <a href='https://repositories.lib.utexas.edu/items/59d8a230-6f66-4cfe-90ae-1ee82c4842c7'><i>here</i></a>).</h5>
 
                             <div style={{height:'1em'}}/>
                             <hr/>
@@ -223,9 +225,9 @@ export class UI extends React.Component<UIInterface, {}> {
                 <div id='sidebar-right' className='closed'>
                     <div id='sidebar-right-panel' className='closed'>
                         <div style={{height:'1em'}}/>
-                        <h4 style={{fontSize:'1em'}}>This is the control panel.</h4>
-                        <h5 id='ui-text' style={{paddingTop:'0.5em'}}>⚠️ This app is still under development!</h5>
-                        <h5 id='ui-text'>Come back soon to see new features!</h5>
+                        <h4 id='ui-title'>This is the control panel.</h4>
+                        <h5 id='ui-text' style={{paddingTop:'0.5em', marginBlockEnd:'0em'}}>This app is still under development.</h5>
+                        <h5 id='ui-text'>Come back soon to see newly added features!</h5>
 
                         <div style={{height:'0.5em'}}/>
                         <hr/>
@@ -240,12 +242,18 @@ export class UI extends React.Component<UIInterface, {}> {
                             <h5 id='ui-text' style={{paddingLeft:'0.5em', marginBlockEnd:'0em'}}>paused</h5>
                         </div>
 
-                        {/* <button id='exit-performance-mode' style={{
-                            scale: this.props.sim.perfomance_mode ? '100%' : '0%',
-                            height: this.props.sim.perfomance_mode ? '-100%' : '0%',
-                            paddingTop: this.props.sim.perfomance_mode ? '0.5em' : '0em',
-                            paddingBottom: this.props.sim.perfomance_mode ? '0.5em' : '0em',
-                        }} className={'ui_button'} onClick={this.exit_performance_mode}>exit performance mode</button> */}
+                        {performace_mode &&
+                            <div> 
+                                <div style={{height:'0.5em'}}/>
+                                <hr/>
+                                <div style={{height:'0.5em'}}/>
+                                <h5 id='ui-text' style={{marginBlockEnd:'0em'}}><big>⚠️</big>The application detected low fps.</h5>
+                                <h5 id='ui-text' style={{marginBlockEnd:'0.5em'}}>Performance mode has been enabled.</h5>
+                                <button id='exit-performance-mode' style={{
+                                    paddingTop: '0.5em', paddingBottom: '0.5em'
+                                }} className={'ui_button exit_button'} onClick={this.force_exit_performance_mode}>exit performance mode</button>
+                            </div>
+                        }
 
                         <div style={{height:'0.5em'}}/>
                         <hr/>

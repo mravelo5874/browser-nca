@@ -238,6 +238,17 @@ i {
   box-shadow: white 0.1em 0.1em 0.1em;
 }
 
+.exit_button {
+  color: rgb(0, 0, 0);
+  background-color: rgba(255, 193, 99, 0.85);
+  box-shadow: rgb(0, 0, 0) 0.1em 0.1em 0.1em;
+}
+
+.exit_button:hover {
+  color: rgb(255, 255, 255);
+  background-color: rgb(255, 0, 0);
+}
+
 .a_button {
   position: relative;
   /* text */
