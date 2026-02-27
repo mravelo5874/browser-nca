@@ -52,8 +52,8 @@ export class Sim {
     prev_d: Vec2 = Vec2.zero
 
     // * auto restart feature
-    auto_restart: boolean = true
-    auto_restart_threshold: number = 500
+    auto_random_model: boolean = true
+    auto_random_model_threshold: number = 300
 
     // * auto apply damage feature
     auto_damage: boolean = true
@@ -113,8 +113,8 @@ export class Sim {
         this.nca.toggle_paused()
     }
 
-    public toggle_auto_reset() {
-        this.auto_restart = !this.auto_restart
+    public toggle_auto_random_model() {
+        this.auto_random_model = !this.auto_random_model
     }
 
     public toggle_auto_damage() {
@@ -250,9 +250,13 @@ export class Sim {
 
         // * auto restart calculation
         let reset = false
-        if (this.auto_restart) {
-            if (this.auto_restart_threshold <= this.nca.get_worker_steps()) {
-                reset = true
+        if (this.auto_random_model) {
+            if (this.auto_random_model_threshold <= this.nca.get_worker_steps()) {
+                // choose a random model
+                const all_models = ['oak', 'minicube', 'sphere', 'rubiks', 'burger', 'cowboy', 'earth', 'cactus', 'maze']
+                const random_index = Math.floor(Math.random() * all_models.length);
+                this.nca.load_model_worker(all_models[random_index])
+                this.ui?.force_set_model_dropdown(all_models[random_index])
             }
         }
 

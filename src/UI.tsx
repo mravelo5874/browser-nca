@@ -33,7 +33,7 @@ export class UI extends React.Component<UIInterface, {}> {
         this.load_model = this.load_model.bind(this)
         this.toggle_sidebar_left = this.toggle_sidebar_left.bind(this)
         this.toggle_sidebar_right = this.toggle_sidebar_right.bind(this)
-        this.toggle_auto_reset = this.toggle_auto_reset.bind(this)
+        this.toggle_auto_random_model = this.toggle_auto_random_model.bind(this)
         this.toggle_auto_damage = this.toggle_auto_damage.bind(this)
         this.toggle_nca_paused = this.toggle_nca_paused.bind(this)
         this.change_light_color = this.change_light_color.bind(this)
@@ -56,10 +56,10 @@ export class UI extends React.Component<UIInterface, {}> {
             let lightradius = document.getElementById('light-radius-slider') as HTMLInputElement
             lightradius.defaultValue ='5.0'
             // * open left sidebar after 1 second
-            setTimeout(() => {
-                this.toggle_sidebar_left()
-                this.forceUpdate()
-            }, 1000)
+            // setTimeout(() => {
+            //     this.toggle_sidebar_left()
+            //     this.forceUpdate()
+            // }, 1000)
         }
     }
 
@@ -131,9 +131,9 @@ export class UI extends React.Component<UIInterface, {}> {
         sim.toggle_nca_paused()
     }
 
-    toggle_auto_reset() {
+    toggle_auto_random_model() {
         let sim = this.props.sim
-        sim.toggle_auto_reset()
+        sim.toggle_auto_random_model()
     }
 
     toggle_auto_damage() {
@@ -167,6 +167,11 @@ export class UI extends React.Component<UIInterface, {}> {
         sim.force_exit_performance_mode()
     }
 
+    force_set_model_dropdown(model: string) {
+        let menu = document.getElementById('load_model_dropdown') as HTMLSelectElement
+        menu.value = model;
+    }
+
     render() {
         const performace_mode = this.props.sim.perfomance_mode
         return(
@@ -192,7 +197,7 @@ export class UI extends React.Component<UIInterface, {}> {
                             <h4 id='ui-title'>How do they work?</h4>
                             <h5 id='ui-text'>As previously mentioned, nca are made up of a bunch of <i>cells</i> (each little box you see is a single cell).</h5>
                             <h5 id='ui-text'>Each step, every cell looks at its <i>neighboring</i> cells and decides what color and how transparent it should be. After enough steps, the model grows to become its target structure!</h5>
-                            <h5 id='ui-text' style={{paddingBottom:'0.5em'}}>This is a gross simplification of how nca work. I wrote an entire +100 page thesis on the subject (available <a href='https://repositories.lib.utexas.edu/items/59d8a230-6f66-4cfe-90ae-1ee82c4842c7'><i>here</i></a>) if you are looking for a more comprehensive answer.</h5>
+                            <h5 id='ui-text' style={{paddingBottom:'0.5em'}}>Check out my thesis (available <a href='https://repositories.lib.utexas.edu/items/59d8a230-6f66-4cfe-90ae-1ee82c4842c7'><i>here</i></a>) for a more comprehensive look into ncas.</h5>
                         
                             <div style={{height:'1em'}}/>
                             <hr/>
@@ -272,12 +277,11 @@ export class UI extends React.Component<UIInterface, {}> {
                                 <option value='earth'>🌍 earth</option>
                                 <option value='cactus'>🌵 cactus</option>
                                 <option value='maze'>🕹️ maze</option>
-                                
                             </select>
 
                             <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0.5em'}}>
-                                <input type='checkbox' id='toggle-auto-reset' onClick={this.toggle_auto_reset} defaultChecked/>
-                                <h5 id='ui-text' style={{paddingLeft:'0.5em', marginBlockEnd:'0em'}}>auto reset (after 500 steps)</h5>
+                                <input type='checkbox' id='toggle-auto-reset' onClick={this.toggle_auto_random_model} defaultChecked/>
+                                <h5 id='ui-text' style={{paddingLeft:'0.5em', marginBlockEnd:'0em'}}>auto randomize model (after 300 steps)</h5>
                             </div>
 
                             <div className='ui-row' style={{paddingBottom:'0.5em', paddingTop:'0em'}}>
